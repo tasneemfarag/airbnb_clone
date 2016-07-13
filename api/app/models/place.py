@@ -26,4 +26,4 @@ class Place(BaseModel):
         data['price_by_night'] = self.max_guest
         data['latitude'] = self.latitude
         data['longitude'] = self.longitude
-        return super(User, self).to_hash(self, data)
+        return super(Place, self).to_hash(self, data)

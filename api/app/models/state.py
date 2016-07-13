@@ -6,4 +6,4 @@ class State(BaseModel):
     def to_hash(self):
         data = {}
         data['name'] = self.name
-        return super(User, self).to_hash(self, data)
+        return super(State, self).to_hash(self, data)

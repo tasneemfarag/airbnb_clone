@@ -9,4 +9,4 @@ class City(BaseModel):
         data = {}
         data['name'] = self.name
         data['state_id'] = self.state
-        return super(User, self).to_hash(self, data)
+        return super(City, self).to_hash(self, data)

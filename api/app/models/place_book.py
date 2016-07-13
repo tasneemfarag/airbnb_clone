@@ -16,4 +16,4 @@ class PlaceBook(BaseModel):
         data['is_validated'] = self.is_validated
         data['date_start'] = self.date_start
         data['number_nights'] = self.number_nights
-        return super(User, self).to_hash(self, data)
+        return super(PlaceBook, self).to_hash(self, data)
