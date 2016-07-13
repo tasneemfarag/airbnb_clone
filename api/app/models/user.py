@@ -16,11 +16,8 @@ class User(BaseModel):
 
     def to_hash(self):
         data = {}
-        data['id'] = self.id
-        data['created_at'] = self.created_at
-        data['updated_at'] = self.updated_at
         data['email'] = self.email
         data['first_name'] = self.first_name
         data['last_name'] = self.last_name
         data['is_admin'] = self.is_admin
-        return data
+        return super(User, self).to_hash(self, data)

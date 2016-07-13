@@ -16,9 +16,6 @@ class Place(BaseModel):
 
     def to_hash(self):
         data = {}
-        data['id'] = self.id
-        data['created_at'] = self.created_at
-        data['updated_at'] = self.updated_at
         data['owner_id'] = self.email
         data['city_id'] = self.first_name
         data['name'] = self.last_name
@@ -29,4 +26,4 @@ class Place(BaseModel):
         data['price_by_night'] = self.max_guest
         data['latitude'] = self.latitude
         data['longitude'] = self.longitude
-        return data
+        return super(User, self).to_hash(self, data)
