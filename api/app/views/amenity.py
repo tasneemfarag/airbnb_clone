@@ -8,6 +8,7 @@ import json
 @app.route('/amenities', methods=['GET'])
 @as_json
 def get_amenities():
+    ''' Returns all amenities in a list named result '''
     amenities = []
     data = Amenity.select()
     for row in data:
@@ -17,6 +18,7 @@ def get_amenities():
 @app.route('/amenities', methods=['POST'])
 @as_json
 def create_amenity():
+    ''' Creates a new amenity '''
     data = request.get_json()
     try:
         new = Amenity.create(
@@ -35,25 +37,40 @@ def create_amenity():
 @app.route('/amenities/<amenity_id>', methods=['GET'])
 @as_json
 def get_amenity(amenity_id):
-    amenity = Amenity.get(Amenity.id == amenity_id)
-    return amenity.to_hash(), 200
+    ''' Gets the details of the given amenity '''
+    try:
+        amenity = Amenity.get(Amenity.id == amenity_id)
+        return amenity.to_hash(), 200
+    except Exception as error:
+        if "Instance matching query does not exist" in error.message:
+            abort(404)
 
 @app.route('/amenities/<amenity_id>', methods=['DELETE'])
 @as_json
 def delete_amenity(amenity_id):
-    amenity = Amenity.delete().where(Amenity.id == amenity_id)
-    amenity.execute()
-    res = {}
-    res['code'] = 201
-    res['msg'] = "Amenity was deleted successfully"
-    return res, 201
+    ''' Deletes the given amenity '''
+    try:
+        amenity = Amenity.delete().where(Amenity.id == amenity_id)
+        amenity.execute()
+        res = {}
+        res['code'] = 201
+        res['msg'] = "Amenity was deleted successfully"
+        return res, 201
+    except Exception as error:
+        if "Instance matching query does not exist" in error.message:
+            abort(404)
 
 @app.route('/places/<place_id>/amenities', methods=['GET'])
 @as_json
 def get_place_amenities(place_id):
-    amenities = []
-    data = PlaceAmenities.select().where(PlaceAmenities.place == place_id)
-    for row in data:
-        amenity = Amenity.get(Amenity.id == row.amenity)
-        amenities.append(amenity.to_hash)
-    return {"result": amenities}, 200
+    ''' Gets all amenities for the given place '''
+    try:
+        amenities = []
+        data = PlaceAmenities.select().where(PlaceAmenities.place == place_id)
+        for row in data:
+            amenity = Amenity.get(Amenity.id == row.amenity)
+            amenities.append(amenity.to_hash)
+        return {"result": amenities}, 200
+    except Exception as error:
+        if "Instance matching query does not exist" in error.message:
+            abort(404)

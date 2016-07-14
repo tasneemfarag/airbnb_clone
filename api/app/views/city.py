@@ -8,15 +8,21 @@ import json
 @app.route('/states/<state_id>/cities', methods=['GET'])
 @as_json
 def get_cities(state_id):
-    cities = []
-    data = City.select().where(City.state == state_id)
-    for row in data:
-        cities.append(row.to_hash())
-    return {"result": cities}, 200
+    ''' Returns all cities in a given state '''
+    try:
+        cities = []
+        data = City.select().where(City.state == state_id)
+        for row in data:
+            cities.append(row.to_hash())
+        return {"result": cities}, 200
+    except Exception as error:
+        if "Instance matching query does not exist" in error.message:
+            abort(404)
 
 @app.route('/states/<state_id>/cities', methods=['POST'])
 @as_json
 def create_city(state_id):
+    ''' Creates a new city in a given state '''
     data = request.get_json()
     try:
         new = City.create(
@@ -27,25 +33,37 @@ def create_city(state_id):
         res['code'] = 201
         res['msg'] = "City was created successfully"
         return res, 201
-    except Exception as e:
-        print str(e)
-        response = {}
-        response['code'] = 10002
-        response['msg'] = "City already exists in this state"
-        return response, 409
+    except Exception as error:
+        if "Instance matching query does not exist" in error.message:
+            abort(404)
+        else:
+            response = {}
+            response['code'] = 10002
+            response['msg'] = "City already exists in this state"
+            return response, 409
 
 @app.route('/states/<state_id>/cities/<city_id>', methods=['GET'])
 @as_json
 def get_city(state_id, city_id):
-    city = City.get(City.id == city_id, City.state == state_id)
-    return city.to_hash(), 200
+    ''' Returns details for a given city '''
+    try:
+        city = City.get(City.id == city_id, City.state == state_id)
+        return city.to_hash(), 200
+    except Exception as error:
+        if "Instance matching query does not exist" in error.message:
+            abort(404)
 
 @app.route('/states/<state_id>/cities/<city_id>', methods=['DELETE'])
 @as_json
 def delete_city(state_id, city_id):
-    delete_city = City.delete().where(City.id == city_id, City.state == state_id)
-    delete_city.execute()
-    response = {}
-    response['code'] = 200
-    response['msg'] = "City account was deleted"
-    return response, 200
+    ''' Deletes the given city '''
+    try:
+        delete_city = City.delete().where(City.id == city_id, City.state == state_id)
+        delete_city.execute()
+        response = {}
+        response['code'] = 200
+        response['msg'] = "City account was deleted"
+        return response, 200
+    except Exception as error:
+        if "Instance matching query does not exist" in error.message:
+            abort(404)

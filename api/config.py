@@ -7,6 +7,7 @@ DATABASE['host'] = '158.69.91.92'
 DATABASE['port'] = 3306
 DATABASE['charset'] = 'utf8'
 if environ.get('AIRBNB_ENV') == 'production':
+    ''' Production specific variables '''
     DEBUG = False
     HOST = '0.0.0.0'
     PORT = 3000
@@ -14,6 +15,7 @@ if environ.get('AIRBNB_ENV') == 'production':
     DATABASE['database'] = 'airbnb_prod'
     DATABASE['password'] = environ.get('AIRBNB_DATABASE_PWD_PROD')
 else:
+    ''' Development specific variables '''
     DEBUG = True
     HOST = 'localhost'
     PORT = 3333

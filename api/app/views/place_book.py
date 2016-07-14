@@ -9,37 +9,53 @@ import json
 @app.route('/places/<place_id>/books', methods=['GET'])
 @as_json
 def get_place_bookings(place_id):
-    booked_dates = []
-    data = PlaceBook.select().where(PlaceBook.place == place_id)
-    for row in data:
-        booked_dates.append(row.to_hash())
-    return {"result": booked_dates}, 200
+    ''' Gets all bookings for a given place '''
+    try:
+        booked_dates = []
+        data = PlaceBook.select().where(PlaceBook.place == place_id)
+        for row in data:
+            booked_dates.append(row.to_hash())
+        return {"result": booked_dates}, 200
+    except Exception as error:
+        if "Instance matching query does not exist" in error.message:
+            abort(404)
 
 @app.route('/places/<place_id>/books', methods=['POST'])
 @as_json
 def book_date(place_id):
-    data = request.get_json()
-    new = PlaceBook.create(
-        place = place_id,
-        user = data['user_id'],
-        is_validated = data['is_validated'],
-        date_start = datetime.strptime(data['date_start'], "%Y/%m/%d %H:%M:%S"),
-        number_nights = data['number_nights']
-    )
-    res = {}
-    res['code'] = 201
-    res['msg'] = "Booking of place was created successfully"
-    return res, 201
+    ''' Creates a new booking for a place '''
+    try:
+        data = request.get_json()
+        new = PlaceBook.create(
+            place = place_id,
+            user = data['user_id'],
+            is_validated = data['is_validated'],
+            date_start = datetime.strptime(data['date_start'], "%Y/%m/%d %H:%M:%S"),
+            number_nights = data['number_nights']
+        )
+        res = {}
+        res['code'] = 201
+        res['msg'] = "Booking of place was created successfully"
+        return res, 201
+    except Exception as error:
+        if "Instance matching query does not exist" in error.message:
+            abort(404)
 
 @app.route('/places/<place_id>/books/<book_id>', methods=['GET'])
 @as_json
 def get_booking(place_id, book_id):
-    booking = PlaceBook.get(PlaceBook.id == book_id)
-    return booking.to_hash(), 200
+    ''' Returns the given booking's details '''
+    try:
+        booking = PlaceBook.get(PlaceBook.id == book_id)
+        return booking.to_hash(), 200
+    except Exception as error:
+        if "Instance matching query does not exist" in error.message:
+            abort(404)
 
 @app.route('/places/<place_id>/books/<book_id>', methods=['PUT'])
 @as_json
 def update_booking(place_id, book_id):
+    ''' Updates the given bookings information '''
     try:
         booking = PlaceBook.get(PlaceBook.id == book_id)
         data = request.get_json()
@@ -58,17 +74,25 @@ def update_booking(place_id, book_id):
         res['msg'] = "Booking of place was updated successfully"
         return res, 200
     except Exception as error:
-        res = {}
-        res['code'] = 403
-        res['msg'] = str(error)
-        return res, 403
+        if "Instance matching query does not exist" in error.message:
+            abort(404)
+        else:
+            res = {}
+            res['code'] = 403
+            res['msg'] = str(error)
+            return res, 403
 
 @app.route('/places/<place_id>/books/<book_id>', methods=['DELETE'])
 @as_json
 def delete_booking(place_id, book_id):
-    booking = PlaceBook.delete().where(PlaceBook.id == book_id)
-    booking.execute()
-    response = {}
-    response['code'] = 200
-    response['msg'] = "Booking was deleted"
-    return response, 200
+    ''' Deletes the given booking '''
+    try:
+        booking = PlaceBook.delete().where(PlaceBook.id == book_id)
+        booking.execute()
+        response = {}
+        response['code'] = 200
+        response['msg'] = "Booking was deleted"
+        return response, 200
+    except Exception as error:
+        if "Instance matching query does not exist" in error.message:
+            abort(404)

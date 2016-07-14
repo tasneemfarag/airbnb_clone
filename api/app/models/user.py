@@ -10,11 +10,13 @@ class User(BaseModel):
     is_admin = BooleanField(default=False)
 
     def set_password(self, clear_password):
+        ''' Sets the password in MD5 encryption '''
         passwd = md5()
         passwd.update(clear_password)
         self.password = passwd.hexdigest()
 
     def to_hash(self):
+        ''' Returns a hash of the User in the database '''
         data = {}
         data['email'] = self.email
         data['first_name'] = self.first_name

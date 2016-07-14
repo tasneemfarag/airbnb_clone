@@ -11,15 +11,18 @@ class BaseModel(Model):
     updated_at = DateTimeField(default=datetime.now(),formats="%d/%m/%Y %H:%M:%S")
 
     def save(self, *args, **kwargs):
+        ''' Saves the Model to the database '''
         self.updated_at = datetime.now()
         super(BaseModel, self).save()
 
     def to_hash(model, self, data):
+        ''' Returns a hash of the BaseModel in the database '''
         data['id'] = self.id
         data['created_at'] = self.created_at.strftime("%Y/%m/%d %H:%M:%S")
         data['updated_at'] = self.updated_at.strftime("%Y/%m/%d %H:%M:%S")
         return data
 
     class Meta:
+        ''' Connects to the database '''
         database = db
         order_by = ("id", )

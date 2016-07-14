@@ -6,6 +6,7 @@ class City(BaseModel):
     state = ForeignKeyField(rel_model=State, related_name="cities", on_delete="CASCADE")
 
     def to_hash(self):
+        ''' Returns a hash of the City in the database '''
         state = State.get(State.id == self.state)
         data = {}
         data['name'] = self.name

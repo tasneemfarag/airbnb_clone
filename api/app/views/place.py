@@ -4,11 +4,12 @@ from app.models.state import State
 from flask_json import as_json, request
 from app import app
 from datetime import datetime
-import json
+from flask import abort
 
 @app.route('/places', methods=['GET'])
 @as_json
 def get_places():
+    ''' Returns all places in a list named result '''
     places = []
     data = Place.select()
     for row in data:
@@ -18,6 +19,7 @@ def get_places():
 @app.route('/places', methods=['POST'])
 @as_json
 def create_place():
+    ''' Creates a new place '''
     data = request.get_json()
     new = Place.create(
         owner = data['owner_id'],
@@ -39,12 +41,18 @@ def create_place():
 @app.route('/places/<place_id>', methods=['GET'])
 @as_json
 def get_place(place_id):
-    place = Place.get(Place.id == place_id)
-    return place.to_hash(), 200
+    ''' Gets a given place '''
+    try:
+        place = Place.get(Place.id == place_id)
+        return place.to_hash(), 200
+    except Exception as error:
+        if "Instance matching query does not exist" in error.message:
+            abort(404)
 
 @app.route('/places/<place_id>', methods=['PUT'])
 @as_json
 def update_place(place_id):
+    ''' Updates a given place '''
     try:
         data = request.get_json()
         place = Place.get(Place.id == place_id)
@@ -75,49 +83,67 @@ def update_place(place_id):
         res['msg'] = "Place was updated successfully"
         return res, 200
     except Exception as error:
-        res = {}
-        res['code'] = 403
-        res['msg'] = str(error)
-        return res, 200
+        if "Instance matching query does not exist" in error.message:
+            abort(404)
+        else:
+            res = {}
+            res['code'] = 403
+            res['msg'] = str(error)
+            return res, 403
 
 @app.route('/places/<place_id>', methods=['DELETE'])
 @as_json
 def delete_place(place_id):
-    delete_place = Place.delete().where(Place.id == place_id)
-    delete_place.execute()
-    response = {}
-    response['code'] = 200
-    response['msg'] = "Place was deleted"
-    return response, 200
+    ''' Deletes the given place '''
+    try:
+        delete_place = Place.delete().where(Place.id == place_id)
+        delete_place.execute()
+        response = {}
+        response['code'] = 200
+        response['msg'] = "Place was deleted"
+        return response, 200
+    except Exception as error:
+        if "Instance matching query does not exist" in error.message:
+            abort(404)
 
 @app.route('/states/<state_id>/cities/<city_id>/places', methods=['GET'])
 @as_json
 def get_places_by_city(state_id, city_id):
-    city = City.get(City.id == city_id, City.state == state_id)
-    places = []
-    data = Place.select().where(Place.city == city.id)
-    for row in data:
-        places.append(row.to_hash())
-    return {"result": places}, 200
+    ''' Gets all places in a city '''
+    try:
+        city = City.get(City.id == city_id, City.state == state_id)
+        places = []
+        data = Place.select().where(Place.city == city.id)
+        for row in data:
+            places.append(row.to_hash())
+        return {"result": places}, 200
+    except Exception as error:
+        if "Instance matching query does not exist" in error.message:
+            abort(404)
 
 @app.route('/states/<state_id>/cities/<city_id>/places', methods=['POST'])
 @as_json
 def create_place_by_city(state_id, city_id):
-    data = request.get_json()
-    city = City.get(City.id == city_id, City.state == state_id)
-    new = Place.create(
-        owner = data['owner_id'],
-        name = data['name'],
-        city = city.id,
-        description = data['description'],
-        number_rooms = data['number_rooms'],
-        number_bathrooms = data['number_bathrooms'],
-        max_guest = data['max_guest'],
-        price_by_night = data['price_by_night'],
-        latitude = data['latitude'],
-        longitude = data['longitude']
-    )
-    res = {}
-    res['code'] = 201
-    res['msg'] = "Place was created successfully"
-    return res, 201
+    ''' Creates a new place in a city '''
+    try:
+        data = request.get_json()
+        city = City.get(City.id == city_id, City.state == state_id)
+        new = Place.create(
+            owner = data['owner_id'],
+            name = data['name'],
+            city = city.id,
+            description = data['description'],
+            number_rooms = data['number_rooms'],
+            number_bathrooms = data['number_bathrooms'],
+            max_guest = data['max_guest'],
+            price_by_night = data['price_by_night'],
+            latitude = data['latitude'],
+            longitude = data['longitude']
+        )
+        res = {}
+        res['code'] = 201
+        res['msg'] = "Place was created successfully"
+        return res, 201
+    except Exception as error:
+        if "Instance matching query does not exist" in error.message:
+            abort(404)

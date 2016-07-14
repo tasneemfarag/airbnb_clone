@@ -15,6 +15,7 @@ class Place(BaseModel):
     longitude = FloatField()
 
     def to_hash(self):
+        ''' Returns a hash of the Place in the database '''
         data = {}
         city = City.get(City.id == self.city)
         owner = User.get(User.id == self.owner)

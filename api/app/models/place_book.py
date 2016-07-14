@@ -10,6 +10,7 @@ class PlaceBook(BaseModel):
     number_nights = IntegerField(default=1)
 
     def to_hash(self):
+        ''' Returns a hash of a booking in the database '''
         data = {}
         place = Place.get(Place.id == self.place)
         user = User.get(User.id == self.user)

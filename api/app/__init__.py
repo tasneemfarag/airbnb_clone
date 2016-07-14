@@ -8,5 +8,5 @@ app.config['JSON_ADD_STATUS'] = False
 '''initialized FlaskJSON with app'''
 json = FlaskJSON(app)
 
-'''Import all views'''
+'''Imports all views'''
 from views import *

@@ -2,11 +2,12 @@ from app.models.state import State
 from flask_json import as_json, request
 from app import app
 from datetime import datetime
-import json
+from flask import abort
 
 @app.route('/states', methods=['GET'])
 @as_json
 def get_states():
+    ''' Returns a list of states in list named result '''
     states = []
     data = State.select()
     for row in data:
@@ -16,6 +17,7 @@ def get_states():
 @app.route('/states', methods=['POST'])
 @as_json
 def create_state():
+    ''' Adds a new state '''
     data = request.get_json()
     try:
         new = State.create(
@@ -35,15 +37,25 @@ def create_state():
 @app.route('/states/<state_id>', methods=['GET'])
 @as_json
 def get_state(state_id):
-    state = State.get(State.id == state_id)
-    return state.to_hash(), 200
+    ''' Returns a given state '''
+    try:
+        state = State.get(State.id == state_id)
+        return state.to_hash(), 200
+    except Exception as error:
+        if "Instance matching query does not exist" in error.message:
+            abort(404)
 
 @app.route('/states/<state_id>', methods=['DELETE'])
 @as_json
 def delete_state(state_id):
-    delete_state = State.delete().where(State.id == state_id)
-    delete_state.execute()
-    response = {}
-    response['code'] = 200
-    response['msg'] = "State account was deleted"
-    return response, 200
+    ''' Deletes the given state '''
+    try:
+        delete_state = State.delete().where(State.id == state_id)
+        delete_state.execute()
+        response = {}
+        response['code'] = 200
+        response['msg'] = "State account was deleted"
+        return response, 200
+    except Exception as error:
+        if "Instance matching query does not exist" in error.message:
+            abort(404)
