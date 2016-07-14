@@ -3,7 +3,7 @@ from os import environ
 '''script  to define some variables of your RestAPI application depending of the environment variable AIRBNB_ENV'''
 
 DATABASE = {}
-DATABASE['host'] = '158.69.85.206'
+DATABASE['host'] = '158.69.91.92'
 DATABASE['port'] = 3306
 DATABASE['charset'] = 'utf8'
 if environ.get('AIRBNB_ENV') == 'production':
@@ -20,4 +20,3 @@ else:
     DATABASE['user'] = 'airbnb_user_dev'
     DATABASE['database'] = 'airbnb_dev'
     DATABASE['password'] = environ.get('AIRBNB_DATABASE_PWD_DEV')
-

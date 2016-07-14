@@ -1,14 +1,18 @@
-from flask import Flask
-from flask_json import FlaskJSON
+from flask_json import as_json
 from datetime import datetime
 from app.models.base import db
 from app import app
 
 '''allow only get request'''
 @app.route('/', methods=['GET'])
+@as_json
 def index():
     '''get the current datetime in UTC and the current of the server'''
-    return json_response(status="OK", utc_time=datetime.utcnow().strftime("%m/%d/%y %H:%M:%S"), time=datetime.now().strftime("%m/%d/%y %H:%M:%S"))
+    data = {}
+    data['status'] = 'OK'
+    data['utc_time'] = datetime.utcnow().strftime("%Y/%m/%d %H:%M:%S")
+    data['time'] = datetime.now().strftime("%Y/%m/%d %H:%M:%S")
+    return data
 
 '''to open databse connection using db'''
 def before_request():
@@ -19,6 +23,7 @@ def after_request():
     db.database.close()
 
 @app.errorhandler(404)
+@as_json
 def not_found(error):
     ''' return a JSON with code = 404 and msg = "not found"'''
-    return json_response(code=404, msg="not found")
+    return {"code":404, "msg":"not found"}, 404
