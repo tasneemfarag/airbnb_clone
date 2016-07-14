@@ -7,8 +7,8 @@ db = MySQLDatabase(host=DATABASE['host'],port=DATABASE['port'],user=DATABASE['us
 
 class BaseModel(Model):
     id = PrimaryKeyField(unique = True)
-    created_at = DateTimeField(default=datetime.now(),formats="%d/%m/%Y %H:%M:%S")
-    updated_at = DateTimeField(default=datetime.now(),formats="%d/%m/%Y %H:%M:%S")
+    created_at = DateTimeField(default=datetime.now(),formats="%Y/%m/%d %H:%M:%S")
+    updated_at = DateTimeField(default=datetime.now(),formats="%Y/%m/%d %H:%M:%S")
 
     def save(self, *args, **kwargs):
         ''' Saves the Model to the database '''
