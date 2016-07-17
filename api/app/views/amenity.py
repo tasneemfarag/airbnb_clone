@@ -69,7 +69,7 @@ def get_place_amenities(place_id):
         data = PlaceAmenities.select().where(PlaceAmenities.place == place_id)
         for row in data:
             amenity = Amenity.get(Amenity.id == row.amenity)
-            amenities.append(amenity.to_hash)
+            amenities.append(amenity.to_hash())
         return {"result": amenities}, 200
     except Exception as error:
         if "Instance matching query does not exist" in error.message:
