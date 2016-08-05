@@ -3,6 +3,7 @@ from flask_json import as_json, request
 from app import app
 from datetime import datetime
 from flask import abort
+import json
 
 @app.route('/states', methods=['GET'])
 @as_json
@@ -18,21 +19,40 @@ def get_states():
 @as_json
 def create_state():
     ''' Adds a new state '''
-    data = request.get_json()
+    data = json.loads(request.data)
     try:
+        if not isinstance(data['name'], unicode):
+            raise ValueError("'name' must be a string")
+        if not data['name']:
+            raise ValueError("'name' cannot be NULL")
         new = State.create(
             name = data['name']
         )
         res = {}
         res['code'] = 201
+        res['id'] = new.id
         res['msg'] = "State was created successfully"
         return res, 201
-    except Exception as e:
-        print str(e)
+    except ValueError as e:
         response = {}
-        response['code'] = 10001
-        response['msg'] = "State already exists"
-        return response, 409
+        response['code'] = 400
+        response['msg'] = e.message
+        return response, 400
+    except KeyError as e:
+        response = {}
+        response['code'] = 400
+        response['msg'] = str(e.message) + " is missing"
+        return response, 400
+    except Exception as e:
+        if type(e).__name__ == 'IntegrityError':
+            response = {}
+            response['code'] = 10001
+            response['msg'] = "State already exists"
+            return response, 409
+        response = {}
+        response['code'] = 500
+        response['msg'] = e.message
+        return response, 500
 
 @app.route('/states/<state_id>', methods=['GET'])
 @as_json

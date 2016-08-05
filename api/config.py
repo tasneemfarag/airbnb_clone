@@ -14,6 +14,14 @@ if environ.get('AIRBNB_ENV') == 'production':
     DATABASE['user'] = 'airbnb_user_prod'
     DATABASE['database'] = 'airbnb_prod'
     DATABASE['password'] = environ.get('AIRBNB_DATABASE_PWD_PROD')
+elif environ.get('AIRBNB_ENV') == 'test':
+    ''' Test specific variables '''
+    DEBUG = False
+    HOST = 'localhost'
+    PORT = 5555
+    DATABASE['user'] = 'airbnb_user_test'
+    DATABASE['database'] = 'airbnb_test'
+    DATABASE['password'] = environ.get('AIRBNB_DATABASE_PWD_TEST')
 else:
     ''' Development specific variables '''
     DEBUG = True

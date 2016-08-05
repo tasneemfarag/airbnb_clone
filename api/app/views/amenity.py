@@ -1,9 +1,11 @@
 from app.models.amenity import Amenity
 from app.models.place_amenity import PlaceAmenities
 from flask_json import as_json, request
+from flask import abort
 from app import app
 from datetime import datetime
 import json
+from peewee import OperationalError
 
 @app.route('/amenities', methods=['GET'])
 @as_json
@@ -21,18 +23,34 @@ def create_amenity():
     ''' Creates a new amenity '''
     data = request.get_json()
     try:
+        if data['name'] and not isinstance(data['name'], unicode):
+            raise OperationalError("Amenity 'name' must be a string value")
         new = Amenity.create(
             name = data['name']
         )
         res = {}
         res['code'] = 201
+        res['id'] = new.id
         res['msg'] = "Amenity was created successfully"
         return res, 201
+    except KeyError as error:
+        response = {}
+        response['code'] = 400
+        response['msg'] = str(error.message) + ' is missing'
+        return response, 400
     except Exception as error:
+        if type(error).__name__ == 'OperationalError':
+            response = {}
+            response['code'] = 400
+            response['msg'] = error.message
+            return response, 400
+        print error
+        print type(error)
+        print type(error).__name__
         response = {}
         response['code'] = 10003
         response['msg'] = "Name already exists"
-        return response, 409
+        return response, 500
 
 @app.route('/amenities/<amenity_id>', methods=['GET'])
 @as_json

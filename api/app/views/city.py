@@ -1,8 +1,10 @@
 from app.models.city import City
 from app.models.city import State
 from flask_json import as_json, request
+from flask import abort
 from app import app
 from datetime import datetime
+from peewee import OperationalError
 import json
 
 @app.route('/states/<state_id>/cities', methods=['GET'])
@@ -23,24 +25,40 @@ def get_cities(state_id):
 @as_json
 def create_city(state_id):
     ''' Creates a new city in a given state '''
-    data = request.get_json()
+    data = json.loads(request.data)
     try:
+        if data['name'] and not isinstance(data['name'], unicode):
+            raise OperationalError("City 'name' must be a string value")
         new = City.create(
             name = data['name'],
             state_id = state_id
         )
         res = {}
         res['code'] = 201
+        res['id'] = new.id
         res['msg'] = "City was created successfully"
         return res, 201
+    except KeyError as error:
+        response = {}
+        response['code'] = 400
+        response['msg'] = str(error.message) + ' is missing'
+        return response, 400
     except Exception as error:
-        if "Instance matching query does not exist" in error.message:
+        if type(error).__name__ == 'IntegrityError':
             abort(404)
+        elif type(error).__name__ == 'OperationalError':
+            response = {}
+            response['code'] = 400
+            response['msg'] = error.message
+            return response, 400
         else:
+            print error
+            print type(error)
+            print type(error).__name__
             response = {}
             response['code'] = 10002
             response['msg'] = "City already exists in this state"
-            return response, 409
+            return response, 500
 
 @app.route('/states/<state_id>/cities/<city_id>', methods=['GET'])
 @as_json

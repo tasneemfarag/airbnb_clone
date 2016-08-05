@@ -3,6 +3,7 @@ from flask_json import as_json, request
 from app import app
 from datetime import datetime
 from flask import abort
+import json
 
 @app.route('/users', methods=['GET'])
 @as_json
@@ -18,24 +19,38 @@ def get_users():
 @as_json
 def create_user():
     ''' Creates a new user '''
-    data = request.get_json()
+    data = request.json
     try:
-        new = User.create(
+        new = User(
             email = data['email'],
             first_name = data['first_name'],
             last_name = data['last_name'],
             is_admin = data['is_admin']
         )
         new.set_password(data['password'])
+        new.save()
         res = {}
         res['code'] = 201
         res['msg'] = "User was created successfully"
+        res['id'] = new.id
         return res, 201
-    except Exception as error:
+    except KeyError as error:
         response = {}
-        response['code'] = 10000
-        response['msg'] = "Email already exists"
-        return response, 409
+        response['code'] = 400
+        response['msg'] = "Request is missing " + str(error)
+        response['uhoh'] = data
+        return response, 400
+    except Exception as error:
+        if type(error).__name__ == 'IntegrityError':
+            response = {}
+            response['code'] = 10000
+            response['msg'] = "Email already exists"
+            return response, 409
+        else:
+            response = {}
+            response['code'] = 500
+            response['msg'] = str(error)
+            return response, 500
 
 @app.route('/users/<user_id>', methods=['GET'])
 @as_json
@@ -52,11 +67,11 @@ def get_user(user_id):
 @as_json
 def update_user(user_id):
     ''' Updates user information '''
-    data = request.get_json()
-    user = User.get(User.id == user_id)
+    data = json.loads(request.data)
     try:
+        user = User.get(User.id == user_id)
         for key in data:
-            if key == 'email':
+            if key == 'email' and user.email != data['email']:
                 raise Exception("Email cannot be changed")
             elif key == 'first_name':
                 user.first_name = data['first_name']
@@ -74,6 +89,11 @@ def update_user(user_id):
     except Exception as error:
         if "Instance matching query does not exist" in error.message:
             abort(404)
+        elif error.message == "Email cannot be changed":
+            response = {}
+            response['code'] = 400
+            response['msg'] = str(error)
+            return response, 400
         response = {}
         response['code'] = 403
         response['msg'] = str(error)

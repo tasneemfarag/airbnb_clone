@@ -5,6 +5,7 @@ from flask_json import as_json, request
 from app import app
 from datetime import datetime
 from flask import abort
+import json
 
 @app.route('/places', methods=['GET'])
 @as_json
@@ -19,24 +20,51 @@ def get_places():
 @app.route('/places', methods=['POST'])
 @as_json
 def create_place():
-    ''' Creates a new place '''
-    data = request.get_json()
-    new = Place.create(
-        owner = data['owner_id'],
-        name = data['name'],
-        city = data['city_id'],
-        description = data['description'],
-        number_rooms = data['number_rooms'],
-        number_bathrooms = data['number_bathrooms'],
-        max_guest = data['max_guest'],
-        price_by_night = data['price_by_night'],
-        latitude = data['latitude'],
-        longitude = data['longitude']
-    )
-    res = {}
-    res['code'] = 201
-    res['msg'] = "Place was created successfully"
-    return res, 201
+    try:
+        ''' Creates a new place '''
+        data = request.get_json()
+        new = Place(
+            owner = data['owner_id'],
+            name = data['name'],
+            city = data['city_id']
+        )
+        if data['description']:
+            new.description = data['description']
+        if data['number_rooms']:
+            new.number_rooms = data['number_rooms']
+        if data['number_bathrooms']:
+            new.number_bathrooms = data['number_bathrooms']
+        if data['max_guest']:
+            new.max_guest = data['max_guest']
+        if data['price_by_night']:
+            new.price_by_night = data['price_by_night']
+        if data['latitude']:
+            new.latitude = data['latitude']
+        if data['longitude']:
+            new.longitude = data['longitude']
+        new.save()
+        res = {}
+        res['code'] = 201
+        res['id'] = new.id
+        res['msg'] = "Place was created successfully"
+        return res, 201
+    except KeyError as e:
+        res = {}
+        res['code'] = 400
+        res['msg'] = str(e.message) + " is missing"
+        return res, 400
+    except ValueError as e:
+        res = {}
+        res['code'] = 400
+        res['msg'] = e.message
+        return res, 400
+    except Exception as e:
+        res = {}
+        res['code'] = 500
+        res['msg'] = e.message
+        print type(e)
+        print res
+        return res, 500
 
 @app.route('/places/<place_id>', methods=['GET'])
 @as_json
@@ -54,12 +82,12 @@ def get_place(place_id):
 def update_place(place_id):
     ''' Updates a given place '''
     try:
-        data = request.get_json()
+        data = json.loads(request.data)
         place = Place.get(Place.id == place_id)
         for key in data:
-            if key == 'owner':
+            if key == 'owner_id':
                 raise Exception('Owner cannot be changed')
-            elif key == 'city':
+            elif key == 'city_id':
                 raise Exception('City cannot be changed')
             elif key == 'name':
                 place.name = data[key]
@@ -128,22 +156,45 @@ def create_place_by_city(state_id, city_id):
     try:
         data = request.get_json()
         city = City.get(City.id == city_id, City.state == state_id)
-        new = Place.create(
+        new = Place(
             owner = data['owner_id'],
             name = data['name'],
-            city = city.id,
-            description = data['description'],
-            number_rooms = data['number_rooms'],
-            number_bathrooms = data['number_bathrooms'],
-            max_guest = data['max_guest'],
-            price_by_night = data['price_by_night'],
-            latitude = data['latitude'],
-            longitude = data['longitude']
+            city = city.id
         )
+        if data['description']:
+            new.description = data['description']
+        if data['number_rooms']:
+            new.number_rooms = data['number_rooms']
+        if data['number_bathrooms']:
+            new.number_bathrooms = data['number_bathrooms']
+        if data['max_guest']:
+            new.max_guest = data['max_guest']
+        if data['price_by_night']:
+            new.price_by_night = data['price_by_night']
+        if data['latitude']:
+            new.latitude = data['latitude']
+        if data['longitude']:
+            new.longitude = data['longitude']
+        new.save()
         res = {}
         res['code'] = 201
+        res['id'] = new.id
         res['msg'] = "Place was created successfully"
         return res, 201
-    except Exception as error:
-        if "Instance matching query does not exist" in error.message:
-            abort(404)
+    except KeyError as e:
+        res = {}
+        res['code'] = 400
+        res['msg'] = str(e.message) + " is missing"
+        return res, 400
+    except ValueError as e:
+        res = {}
+        res['code'] = 400
+        res['msg'] = e.message
+        return res, 400
+    except Exception as e:
+        res = {}
+        res['code'] = 500
+        res['msg'] = e.message
+        print type(e)
+        print res
+        return res, 500

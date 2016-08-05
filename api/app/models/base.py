@@ -3,7 +3,7 @@ from peewee import *
 from datetime import datetime
 
 db = MySQLDatabase(host=DATABASE['host'],port=DATABASE['port'],user=DATABASE['user'],\
-                  password=DATABASE['password'],database=DATABASE['database'])
+                   password=DATABASE['password'],database=DATABASE['database'])
 
 class BaseModel(Model):
     id = PrimaryKeyField(unique = True)
