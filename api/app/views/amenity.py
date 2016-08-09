@@ -1,4 +1,5 @@
 from app.models.amenity import Amenity
+from app.models.place import Place
 from app.models.place_amenity import PlaceAmenities
 from flask_json import as_json, request
 from flask import abort
@@ -83,12 +84,99 @@ def delete_amenity(amenity_id):
 def get_place_amenities(place_id):
     ''' Gets all amenities for the given place '''
     try:
+        query = Place.select().where(Place.id == place_id)
+        if not query.exists():
+            raise LookupError('place_id')
         amenities = []
-        data = PlaceAmenities.select().where(PlaceAmenities.place == place_id)
+        data = Amenity.select().join(PlaceAmenities).where(PlaceAmenities.place == place_id)
         for row in data:
-            amenity = Amenity.get(Amenity.id == row.amenity)
-            amenities.append(amenity.to_hash())
+            amenities.append(row.to_hash())
         return {"result": amenities}, 200
+    except LookupError as e:
+        abort(404)
     except Exception as error:
         if "Instance matching query does not exist" in error.message:
             abort(404)
+
+@app.route('/places/<place_id>/amenities/<amenity_id>', methods=['POST'])
+@as_json
+def post_place_amenity(place_id, amenity_id):
+    try:
+        ''' Check if place_id is valid '''
+        query = Place.select().where(Place.id == place_id)
+        if not query.exists():
+            raise LookupError('place_id')
+
+        ''' Check if amenity_id is valid '''
+        query = Amenity.select().where(Amenity.id == amenity_id)
+        if not query.exists():
+            raise LookupError('amenity_id')
+
+        ''' Check if amenity is already added for place '''
+        query = PlaceAmenities.select().where(PlaceAmenities.amenity == amenity_id, PlaceAmenities.place == place_id)
+        if query.exists():
+            raise ValueError('Amenity is already set for the given place')
+
+        ''' Add amenity for place '''
+        new = PlaceAmenities.create(
+            place = place_id,
+            amenity = amenity_id
+        )
+        res = {
+            'code': 201,
+            'msg': 'Amenity added successfully for the given place'
+        }
+        return res, 201
+    except LookupError as e:
+        abort(404)
+    except ValueError as e:
+        res = {
+            'code': 400,
+            'msg': e.message
+        }
+        return res, res['code']
+    except Exception as e:
+        res = {
+            'code': 500,
+            'msg': e.message
+        }
+        return res, 500
+
+@app.route('/places/<place_id>/amenities/<amenity_id>', methods=['DELETE'])
+@as_json
+def delete_place_amenity(place_id, amenity_id):
+    try:
+        ''' Check if place_id is valid '''
+        query = Place.select().where(Place.id == place_id)
+        if not query.exists():
+            raise LookupError('place_id')
+
+        ''' Check if amenity_id is valid '''
+        query = Amenity.select().where(Amenity.id == amenity_id)
+        if not query.exists():
+            raise LookupError('amenity_id')
+
+        ''' Check if amenity is already added for place '''
+        query = PlaceAmenities.select().where(PlaceAmenities.amenity == amenity_id, PlaceAmenities.place == place_id)
+        if not query.exists():
+            raise LookupError('amenity_id, place_id')
+
+        ''' Add amenity for place '''
+        delete = PlaceAmenities.delete().where(
+            PlaceAmenities.amenity == amenity_id,
+            PlaceAmenities.place == place_id
+        )
+        delete.execute()
+        res = {
+            'code': 200,
+            'msg': 'Amenity deleted successfully for the given place'
+        }
+        return res, 200
+    except LookupError as e:
+        abort(404)
+    except Exception as e:
+        res = {
+            'code': 500,
+            'msg': e.message
+        }
+        return res, 500
