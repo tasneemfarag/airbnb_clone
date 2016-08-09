@@ -35,7 +35,7 @@ def create_city(state_id):
         )
         res = {}
         res['code'] = 201
-        res['id'] = new.id
+        res['id'] = int(new.id)
         res['msg'] = "City was created successfully"
         return res, 201
     except KeyError as error:
@@ -53,6 +53,7 @@ def create_city(state_id):
             return response, 400
         else:
             print error
+            print error.message
             print type(error)
             print type(error).__name__
             response = {}
