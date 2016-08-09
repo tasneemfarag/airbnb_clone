@@ -1,12 +1,17 @@
+''' Import app and models '''
 from app import app
 from app.models.base import db
 from app.models.city import City
 from app.models.state import State
+
+''' Import test data '''
+from city_data import *
+from state_data import *
+
+''' Import packages '''
 import unittest
 import json
 import logging
-from city_data import *
-from state_data import *
 
 class AppTestCase(unittest.TestCase):
 
@@ -21,71 +26,114 @@ class AppTestCase(unittest.TestCase):
         db.close()
 
     def test_create(self):
-        ''' create correctly a city if all required parameters are send '''
+        '''Set base data'''
         rv = self.app.post('/states', headers={'Content-Type': 'application/json'}, data=json.dumps(good_state_1))
+        self.assertEqual(rv.status_code, 201)
+
+        ''' Test creation of cities in the given state '''
         rv = self.app.post('/states/1/cities', headers={'Content-Type': 'application/json'}, data=json.dumps(good_city_1))
         self.assertEqual(rv.status_code, 201)
         data = json.loads(rv.data)
         self.assertEqual(data['id'], 1)
+
         rv = self.app.post('/states/1/cities', headers={'Content-Type': 'application/json'}, data=json.dumps(good_city_2))
         self.assertEqual(rv.status_code, 201)
         data = json.loads(rv.data)
         self.assertEqual(data['id'], 2)
 
-        ''' test all cases of missing parameters '''
+        ''' Test if 'name' value is NULL '''
         rv = self.app.post('/states/1/cities', headers={'Content-Type': 'application/json'}, data=json.dumps(bad_city_1))
         self.assertEqual(rv.status_code, 400)
+
+        ''' Test if 'name' value is not a string '''
         rv = self.app.post('/states/1/cities', headers={'Content-Type': 'application/json'}, data=json.dumps(bad_city_2))
         self.assertEqual(rv.status_code, 400)
+
+        ''' Test if 'name' key is not in data '''
         rv = self.app.post('/states/1/cities', headers={'Content-Type': 'application/json'}, data=json.dumps(bad_city_3))
         self.assertEqual(rv.status_code, 400)
-        rv = self.app.post('/states/500/cities', headers={'Content-Type': 'application/json'}, data=json.dumps(good_city_1))
+
+        ''' Test if state does not exist '''
+        rv = self.app.post('/states/404/cities', headers={'Content-Type': 'application/json'}, data=json.dumps(good_city_1))
         self.assertEqual(rv.status_code, 404)
 
+        ''' Test if city already exists '''
+        rv = self.app.post('/states/1/cities', headers={'Content-Type': 'application/json'}, data=json.dumps(good_city_1))
+        self.assertEqual(rv.status_code, 409)
+
     def test_list(self):
-        ''' return 0 elements if no city was created'''
+        ''' Set base data '''
         rv = self.app.post('/states', headers={'Content-Type': 'application/json'}, data=json.dumps(good_state_1))
+        self.assertEqual(rv.status_code, 201)
+
+        ''' Test if state does not exist '''
+        rv = self.app.get('/states/404/cities', headers={'Content-Type': 'application/json'}, data=json.dumps(good_city_1))
+        self.assertEqual(rv.status_code, 404)
+
+        ''' Test that no cities exist '''
         rv = self.app.get('/states/1/cities')
         self.assertEqual(rv.status_code, 200)
         data = json.loads(rv.data)['result']
         self.assertEqual(len(data), 0)
 
-        ''' return 1 element after a state creation'''
+        ''' Create a new city '''
         rv = self.app.post('/states/1/cities', headers={'Content-Type': 'application/json'}, data=json.dumps(good_city_1))
+        self.assertEqual(rv.status_code, 201)
+
+        ''' return 1 element after a state creation'''
         rv = self.app.get('/states/1/cities')
         data = json.loads(rv.data)['result']
         self.assertEqual(len(data), 1)
 
     def test_get(self):
-        ''' create a city and after get it '''
+        ''' Set base data '''
         rv = self.app.post('/states', headers={'Content-Type': 'application/json'}, data=json.dumps(good_state_1))
+        self.assertEqual(rv.status_code, 201)
         rv = self.app.post('/states/1/cities', headers={'Content-Type': 'application/json'}, data=json.dumps(good_city_1))
-        rv = self.app.get('/states/1/cities/1')
+        self.assertEqual(rv.status_code, 201)
 
-        ''' check the status code '''
-        self.assertEqual(rv.status_code, 200)
-
-        ''' check if it's the same resource as during the creation '''
-        city = json.loads(rv.data)
-        self.assertEqual(city['name'], good_city_1['name'])
-
-        ''' check when trying to get an unknown city '''
-        rv = self.app.get('/states/1/cities/500')
+        ''' Test if state does not exist '''
+        rv = self.app.get('/states/404/cities/1')
         self.assertEqual(rv.status_code, 404)
 
-    def test_delete(self):
-        ''' create a city and after delete it '''
-        rv = self.app.post('/states', headers={'Content-Type': 'application/json'}, data=json.dumps(good_state_1))
-        rv = self.app.post('/states/1/cities', headers={'Content-Type': 'application/json'}, data=json.dumps(good_city_1))
-        before = len(json.loads(self.app.get('/states/1/cities').data)['result'])
-        rv = self.app.delete('/states/1/cities/1')
-        after = len(json.loads(self.app.get('/states/1/cities').data)['result'])
+        ''' Test if city does not exist '''
+        rv = self.app.get('/states/1/cities/404')
+        self.assertEqual(rv.status_code, 404)
 
-        ''' check the status code '''
+        ''' Retrieve the newly created city '''
+        rv = self.app.get('/states/1/cities/1')
+        self.assertEqual(rv.status_code, 200)
+        data = json.loads(rv.data)
+        self.assertEqual(data['name'], good_city_1['name'])
+
+    def test_delete(self):
+        ''' Set base data '''
+        rv = self.app.post('/states', headers={'Content-Type': 'application/json'}, data=json.dumps(good_state_1))
+        self.assertEqual(rv.status_code, 201)
+        rv = self.app.post('/states/1/cities', headers={'Content-Type': 'application/json'}, data=json.dumps(good_city_1))
+        self.assertEqual(rv.status_code, 201)
+
+        ''' Test if state does not exist '''
+        rv = self.app.delete('/states/404/cities/1')
+        self.assertEqual(rv.status_code, 404)
+
+        ''' Test if city does not exist '''
+        rv = self.app.delete('/states/1/cities/404')
+        self.assertEqual(rv.status_code, 404)
+
+        ''' Check the a city exists '''
+        rv = self.app.get('/states/1/cities')
+        data = json.loads(rv.data)['result']
+        self.assertEqual(len(data), 1)
+
+        ''' Delete the existing city '''
+        rv = self.app.delete('/states/1/cities/1')
         self.assertEqual(rv.status_code, 200)
 
-        ''' check the number of element before and after a delete '''
-        self.assertEqual(after - before, -1)
+        ''' Check that the city was deleted '''
+        rv = self.app.get('/states/1/cities')
+        data = json.loads(rv.data)['result']
+        self.assertEqual(len(data), 0)
 
 if __name__ == '__main__':
     unittest.main()
