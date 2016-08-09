@@ -24,6 +24,12 @@ def after_request():
 
 @app.errorhandler(404)
 @as_json
-def not_found(error):
+def not_found(e):
     ''' return a JSON with code = 404 and msg = "not found"'''
     return {"code":404, "msg":"not found"}, 404
+
+@app.errorhandler(500)
+@as_json
+def not_found(e):
+    ''' return a JSON with code = 500 and msg = "server"'''
+    return {"code":500, "msg":"server error"}, 500

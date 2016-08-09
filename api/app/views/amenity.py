@@ -65,10 +65,7 @@ def create_amenity():
         res['msg'] = e.message
         return res, 409
     except Exception as e:
-        res = {}
-        res['code'] = 500
-        res['msg'] = e.message
-        return res, 500
+        abort(500)
 
 @app.route('/amenities/<amenity_id>', methods=['GET'])
 @as_json
@@ -86,10 +83,7 @@ def get_amenity(amenity_id):
     except LookupError as e:
         abort(404)
     except Exception as e:
-        res = {}
-        res['code'] = 500
-        res['msg'] = e.message
-        return res, 500
+        abort(500)
 
 @app.route('/amenities/<amenity_id>', methods=['DELETE'])
 @as_json
@@ -111,10 +105,7 @@ def delete_amenity(amenity_id):
     except LookupError as e:
         abort(404)
     except Exception as e:
-        res = {}
-        res['code'] = 500
-        res['msg'] = e.message
-        return res, 500
+        abort(500)
 
 @app.route('/places/<place_id>/amenities', methods=['GET'])
 @as_json
@@ -135,10 +126,7 @@ def get_place_amenities(place_id):
     except LookupError as e:
         abort(404)
     except Exception as e:
-        res = {}
-        res['code'] = 500
-        res['msg'] = e.message
-        return res, 500
+        abort(500)
 
 @app.route('/places/<place_id>/amenities/<amenity_id>', methods=['POST'])
 @as_json
@@ -172,17 +160,12 @@ def post_place_amenity(place_id, amenity_id):
     except LookupError as e:
         abort(404)
     except ValueError as e:
-        res = {
-            'code': 400,
-            'msg': e.message
-        }
+        res = {}
+        res['code'] = 400
+        res['msg'] = e.message
         return res, res['code']
     except Exception as e:
-        res = {
-            'code': 500,
-            'msg': e.message
-        }
-        return res, 500
+        abort(500)
 
 @app.route('/places/<place_id>/amenities/<amenity_id>', methods=['DELETE'])
 @as_json
@@ -209,16 +192,11 @@ def delete_place_amenity(place_id, amenity_id):
             PlaceAmenities.place == place_id
         )
         delete.execute()
-        res = {
-            'code': 200,
-            'msg': 'Amenity deleted successfully for the given place'
-        }
+        res = {}
+        res['code'] = 200
+        res['msg'] = 'Amenity deleted successfully for the given place'
         return res, 200
     except LookupError as e:
         abort(404)
     except Exception as e:
-        res = {
-            'code': 500,
-            'msg': e.message
-        }
-        return res, 500
+        abort(500)

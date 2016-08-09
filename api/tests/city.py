@@ -17,7 +17,7 @@ class AppTestCase(unittest.TestCase):
 
     def setUp(self):
         db.connect()
-        db.create_tables([City, State])
+        db.create_tables([City, State], safe=True)
         logging.disable(logging.CRITICAL)
         self.app = app.test_client()
 

@@ -28,10 +28,7 @@ def get_cities(state_id):
     except LookupError as e:
         abort(404)
     except Exception as e:
-        res = {}
-        res['code'] = 500
-        res['msg'] = e.message
-        return res, 500
+        abort(500)
 
 @app.route('/states/<state_id>/cities', methods=['POST'])
 @as_json
@@ -85,10 +82,7 @@ def create_city(state_id):
         res['msg'] = e.message
         return res, 409
     except Exception as e:
-        response = {}
-        response['code'] = 500
-        response['msg'] = e.message
-        return response, 500
+        abort(500)
 
 @app.route('/states/<state_id>/cities/<city_id>', methods=['GET'])
 @as_json
@@ -111,10 +105,7 @@ def get_city(state_id, city_id):
     except LookupError as e:
         abort(404)
     except Exception as e:
-        response = {}
-        response['code'] = 500
-        response['msg'] = e.message
-        return response, 500
+        abort(500)
 
 @app.route('/states/<state_id>/cities/<city_id>', methods=['DELETE'])
 @as_json
@@ -141,7 +132,4 @@ def delete_city(state_id, city_id):
     except LookupError as e:
         abort(404)
     except Exception as e:
-        response = {}
-        response['code'] = 500
-        response['msg'] = e.message
-        return response, 500
+        abort(500)
