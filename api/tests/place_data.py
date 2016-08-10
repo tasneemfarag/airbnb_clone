@@ -85,9 +85,10 @@ bad_place_3 = {
 }
 
 bad_place_4 = {
-	'owner_id': 1,
+	'owner_id': 'nope',
 	'city_id': 1,
 	'name': 'Another awesome place',
+	'description': 'This is the second best place ever!',
 	'number_rooms': 2,
 	'number_bathrooms': 1,
 	'max_guest': 4,
@@ -98,9 +99,10 @@ bad_place_4 = {
 
 bad_place_5 = {
 	'owner_id': 1,
-	'city_id': 1,
+	'city_id': 'nope',
 	'name': 'Another awesome place',
 	'description': 'This is the second best place ever!',
+	'number_rooms': 2,
 	'number_bathrooms': 1,
 	'max_guest': 4,
 	'price_by_night': 100,
@@ -111,9 +113,10 @@ bad_place_5 = {
 bad_place_6 = {
 	'owner_id': 1,
 	'city_id': 1,
-	'name': 'Another awesome place',
+	'name': 400,
 	'description': 'This is the second best place ever!',
 	'number_rooms': 2,
+	'number_bathrooms': 1,
 	'max_guest': 4,
 	'price_by_night': 100,
 	'latitude': 37.792085,
@@ -124,9 +127,10 @@ bad_place_7 = {
 	'owner_id': 1,
 	'city_id': 1,
 	'name': 'Another awesome place',
-	'description': 'This is the second best place ever!',
+	'description': 400,
 	'number_rooms': 2,
 	'number_bathrooms': 1,
+	'max_guest': 4,
 	'price_by_night': 100,
 	'latitude': 37.792085,
 	'longitude': -122.4015567
@@ -137,9 +141,10 @@ bad_place_8 = {
 	'city_id': 1,
 	'name': 'Another awesome place',
 	'description': 'This is the second best place ever!',
-	'number_rooms': 2,
+	'number_rooms': 'nope',
 	'number_bathrooms': 1,
 	'max_guest': 4,
+	'price_by_night': 100,
 	'latitude': 37.792085,
 	'longitude': -122.4015567
 }
@@ -150,9 +155,10 @@ bad_place_9 = {
 	'name': 'Another awesome place',
 	'description': 'This is the second best place ever!',
 	'number_rooms': 2,
-	'number_bathrooms': 1,
+	'number_bathrooms': 'nope',
 	'max_guest': 4,
 	'price_by_night': 100,
+	'latitude': 37.792085,
 	'longitude': -122.4015567
 }
 
@@ -163,13 +169,53 @@ bad_place_10 = {
 	'description': 'This is the second best place ever!',
 	'number_rooms': 2,
 	'number_bathrooms': 1,
-	'max_guest': 4,
+	'max_guest': 'nope',
 	'price_by_night': 100,
-	'latitude': 37.792085
+	'latitude': 37.792085,
+	'longitude': -122.4015567
 }
 
 bad_place_11 = {
-	'owner_id': 'Noone',
+	'owner_id': 1,
+	'city_id': 1,
+	'name': 'Another awesome place',
+	'description': 'This is the second best place ever!',
+	'number_rooms': 2,
+	'number_bathrooms': 1,
+	'max_guest': 4,
+	'price_by_night': 'nope',
+	'latitude': 37.792085,
+	'longitude': -122.4015567
+}
+
+bad_place_12 = {
+	'owner_id': 1,
+	'city_id': 1,
+	'name': 'Another awesome place',
+	'description': 'This is the second best place ever!',
+	'number_rooms': 2,
+	'number_bathrooms': 1,
+	'max_guest': 4,
+	'price_by_night': 100,
+	'latitude': 'nope',
+	'longitude': -122.4015567
+}
+
+bad_place_13 = {
+	'owner_id': 1,
+	'city_id': 1,
+	'name': 'Another awesome place',
+	'description': 'This is the second best place ever!',
+	'number_rooms': 2,
+	'number_bathrooms': 1,
+	'max_guest': 4,
+	'price_by_night': 100,
+	'latitude': 37.792085,
+	'longitude': 'nope'
+}
+
+bad_place_14 = {
+	'owner_id': 404,
 	'city_id': 1,
 	'name': 'Another awesome place',
 	'description': 'This is the second best place ever!',
@@ -181,9 +227,9 @@ bad_place_11 = {
 	'longitude': -122.4015567
 }
 
-bad_place_12 = {
+bad_place_15 = {
 	'owner_id': 1,
-	'city_id': 'San Francisco',
+	'city_id': 404,
 	'name': 'Another awesome place',
 	'description': 'This is the second best place ever!',
 	'number_rooms': 2,

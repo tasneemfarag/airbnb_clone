@@ -1,8 +1,12 @@
+''' Import app and models '''
+from app import app
 from app.models.place import Place
 from app.models.city import City
 from app.models.state import State
+from app.models.user import User
+
+''' Import packages '''
 from flask_json import as_json, request
-from app import app
 from datetime import datetime
 from flask import abort
 import json
@@ -20,9 +24,52 @@ def get_places():
 @app.route('/places', methods=['POST'])
 @as_json
 def create_place():
+    data = json.loads(request.data)
     try:
+        ''' Check for required keys '''
+        if not 'owner_id' in data:
+            raise KeyError('owner_id')
+        if not 'name' in data:
+            raise KeyError('name')
+        if not 'city_id' in data:
+            raise KeyError('city_id')
+
+        ''' Check required key value data types '''
+        if not isinstance(data['owner_id'], int):
+            raise TypeError('owner_id is not an integer')
+        if not isinstance(data['name'], unicode):
+            raise TypeError('name is not a string')
+        if not isinstance(data['city_id'], int):
+            raise TypeError('city_id is not an integer')
+
+        ''' Check optional key value data types '''
+        if 'description' in data and not isinstance(data['description'], unicode):
+            raise TypeError('description is not a string')
+        if 'number_rooms' in data and not isinstance(data['number_rooms'], int):
+            raise TypeError('number_rooms is not an integer')
+        if 'number_bathrooms' in data and not isinstance(data['number_bathrooms'], int):
+            raise TypeError('number_bathrooms is not an integer')
+        if 'max_guest' in data and not isinstance(data['max_guest'], int):
+            raise TypeError('max_guest is not an integer')
+        if 'price_by_night' in data and not isinstance(data['price_by_night'], int):
+            raise TypeError('price_by_night is not an integer')
+        if 'latitude' in data and not isinstance(data['latitude'], float):
+            raise TypeError('latitude is not a float')
+        if 'longitude' in data and not isinstance(data['longitude'], float):
+            raise TypeError('longitude is not a float')
+
+        ''' Check if city_id exists '''
+        query = City.select().where(City.id == data['city_id'])
+        if not query.exists():
+            raise LookupError('city_id')
+
+        ''' Check if owner_id exists '''
+        query = User.select().where(User.id == data['owner_id'])
+        if not query.exists():
+            raise LookupError('owner_id')
+
+
         ''' Creates a new place '''
-        data = request.get_json()
         new = Place(
             owner = data['owner_id'],
             name = data['name'],
@@ -53,29 +100,33 @@ def create_place():
         res['code'] = 400
         res['msg'] = str(e.message) + " is missing"
         return res, 400
-    except ValueError as e:
+    except TypeError as e:
         res = {}
         res['code'] = 400
         res['msg'] = e.message
         return res, 400
+    except LookupError as e:
+        abort(404)
     except Exception as e:
-        res = {}
-        res['code'] = 500
-        res['msg'] = e.message
-        print type(e)
-        print res
-        return res, 500
+        abort(500)
 
 @app.route('/places/<place_id>', methods=['GET'])
 @as_json
 def get_place(place_id):
     ''' Gets a given place '''
     try:
+        ''' Check if place_id exists '''
+        query = Place.select().where(Place.id == place_id)
+        if not query.exists():
+            raise LookupError('place_id')
+
+        ''' Return place data '''
         place = Place.get(Place.id == place_id)
         return place.to_hash(), 200
-    except Exception as error:
-        if "Instance matching query does not exist" in error.message:
-            abort(404)
+    except LookupError as e:
+        abort(404)
+    except Exception as e:
+        abort(500)
 
 @app.route('/places/<place_id>', methods=['PUT'])
 @as_json
@@ -83,13 +134,39 @@ def update_place(place_id):
     ''' Updates a given place '''
     try:
         data = json.loads(request.data)
+
+        ''' Check if place_id exists '''
+        query = Place.select().where(Place.id == place_id)
+        if not query.exists():
+            raise LookupError('place_id')
+
+        ''' Check that no request to change protected values '''
+        if 'owner_id' in data:
+            raise ValueError('Owner cannot be changed')
+        if 'city_id' in data:
+            raise ValueError('City cannot be changed')
+
+        ''' Check for valid data types '''
+        if 'name' in data and not isinstance(data['name'], unicode):
+            raise TypeError('name is not a string')
+        if 'description' in data and not isinstance(data['description'], unicode):
+            raise TypeError('description is not a string')
+        if 'number_rooms' in data and not isinstance(data['number_rooms'], int):
+            raise TypeError('number_rooms is not an integer')
+        if 'number_bathrooms' in data and not isinstance(data['number_bathrooms'], int):
+            raise TypeError('number_bathrooms is not an integer')
+        if 'max_guest' in data and not isinstance(data['max_guest'], int):
+            raise TypeError('max_guest is not an integer')
+        if 'price_by_night' in data and not isinstance(data['price_by_night'], int):
+            raise TypeError('price_by_night is not an integer')
+        if 'latitude' in data and not isinstance(data['latitude'], float):
+            raise TypeError('latitude is not a float')
+        if 'longitude' in data and not isinstance(data['longitude'], float):
+            raise TypeError('longitude is not a float')
+
         place = Place.get(Place.id == place_id)
         for key in data:
-            if key == 'owner_id':
-                raise Exception('Owner cannot be changed')
-            elif key == 'city_id':
-                raise Exception('City cannot be changed')
-            elif key == 'name':
+            if key == 'name':
                 place.name = data[key]
             elif key == 'description':
                 place.description = data[key]
@@ -110,52 +187,131 @@ def update_place(place_id):
         res['code'] = 200
         res['msg'] = "Place was updated successfully"
         return res, 200
+    except ValueError as e:
+        res = {}
+        res['code'] = 403
+        res['msg'] = e.message
+        return res, 403
+    except LookupError as e:
+        abort(404)
+    except TypeError as e:
+        res = {}
+        res['code'] = 400
+        res['msg'] = e.message
+        return res, 400
     except Exception as error:
-        if "Instance matching query does not exist" in error.message:
-            abort(404)
-        else:
-            res = {}
-            res['code'] = 403
-            res['msg'] = str(error)
-            return res, 403
+        abort(500)
 
 @app.route('/places/<place_id>', methods=['DELETE'])
 @as_json
 def delete_place(place_id):
     ''' Deletes the given place '''
     try:
+        ''' Check if place_id exists '''
+        query = Place.select().where(Place.id == place_id)
+        if not query.exists():
+            raise LookupError('place_id')
+
+        ''' Delete the given place '''
         delete_place = Place.delete().where(Place.id == place_id)
         delete_place.execute()
         response = {}
         response['code'] = 200
         response['msg'] = "Place was deleted"
         return response, 200
-    except Exception as error:
-        if "Instance matching query does not exist" in error.message:
-            abort(404)
+    except LookupError as e:
+        abort(404)
+    except Exception as e:
+        abort(505)
 
 @app.route('/states/<state_id>/cities/<city_id>/places', methods=['GET'])
 @as_json
 def get_places_by_city(state_id, city_id):
     ''' Gets all places in a city '''
     try:
-        city = City.get(City.id == city_id, City.state == state_id)
+        ''' Check if the state_id exists '''
+        query = State.select().where(State.id == state_id)
+        if not query.exists():
+            raise LookupError('state_id')
+
+        ''' Check if the city_id exists '''
+        query = City.select().where(City.id == city_id)
+        if not query.exists():
+            raise LookupError('city_id')
+
+        ''' Check if the city_id is associated to the state_id '''
+        city = City.get(City.id == city_id)
+        query = State.select().where(State.id == city.state, State.id == state_id)
+        if not query.exists():
+            raise LookupError('city_id, state_id')
+
+        ''' Return all places in the given city '''
         places = []
         data = Place.select().where(Place.city == city.id)
         for row in data:
             places.append(row.to_hash())
         return {"result": places}, 200
+    except LookupError as e:
+        abort(404)
     except Exception as error:
-        if "Instance matching query does not exist" in error.message:
-            abort(404)
+        abort(500)
 
 @app.route('/states/<state_id>/cities/<city_id>/places', methods=['POST'])
 @as_json
 def create_place_by_city(state_id, city_id):
     ''' Creates a new place in a city '''
     try:
-        data = request.get_json()
-        city = City.get(City.id == city_id, City.state == state_id)
+        data = json.loads(request.data)
+
+        ''' Check for required keys '''
+        if not 'owner_id' in data:
+            raise KeyError('owner_id')
+        if not 'name' in data:
+            raise KeyError('name')
+
+        ''' Check required key value data types '''
+        if not isinstance(data['owner_id'], int):
+            raise TypeError('owner_id is not an integer')
+        if not isinstance(data['name'], unicode):
+            raise TypeError('name is not a string')
+
+        ''' Check optional key value data types '''
+        if 'description' in data and not isinstance(data['description'], unicode):
+            raise TypeError('description is not a string')
+        if 'number_rooms' in data and not isinstance(data['number_rooms'], int):
+            raise TypeError('number_rooms is not an integer')
+        if 'number_bathrooms' in data and not isinstance(data['number_bathrooms'], int):
+            raise TypeError('number_bathrooms is not an integer')
+        if 'max_guest' in data and not isinstance(data['max_guest'], int):
+            raise TypeError('max_guest is not an integer')
+        if 'price_by_night' in data and not isinstance(data['price_by_night'], int):
+            raise TypeError('price_by_night is not an integer')
+        if 'latitude' in data and not isinstance(data['latitude'], float):
+            raise TypeError('latitude is not a float')
+        if 'longitude' in data and not isinstance(data['longitude'], float):
+            raise TypeError('longitude is not a float')
+
+        ''' Check if the state_id exists '''
+        query = State.select().where(State.id == state_id)
+        if not query.exists():
+            raise LookupError('state_id')
+
+        ''' Check if the city_id exists '''
+        query = City.select().where(City.id == city_id)
+        if not query.exists():
+            raise LookupError('city_id')
+
+        ''' Check if the city_id is associated to the state_id '''
+        city = City.get(City.id == city_id)
+        query = State.select().where(State.id == city.state, State.id == state_id)
+        if not query.exists():
+            raise LookupError('city_id, state_id')
+
+        ''' Check if the owner_id exists '''
+        query = User.select().where(User.id == data['owner_id'])
+        if not query.exists():
+            raise LookupError('owner_id')
+        
         new = Place(
             owner = data['owner_id'],
             name = data['name'],
@@ -186,15 +342,13 @@ def create_place_by_city(state_id, city_id):
         res['code'] = 400
         res['msg'] = str(e.message) + " is missing"
         return res, 400
-    except ValueError as e:
+    except LookupError as e:
+        abort(404)
+    except TypeError as e:
         res = {}
         res['code'] = 400
         res['msg'] = e.message
         return res, 400
     except Exception as e:
-        res = {}
-        res['code'] = 500
-        res['msg'] = e.message
-        print type(e)
-        print res
-        return res, 500
+        print e.message
+        abort(500)
