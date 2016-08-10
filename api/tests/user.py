@@ -1,19 +1,22 @@
+''' Import app and models '''
 from app import app
 from app.models.base import db
 from app.models.user import User
-import unittest
+
+''' Import test data '''
+from user_data import *
+
+''' Import packages '''
 from datetime import datetime
+import unittest
 import json
 import logging
-from user_data import *
 
 class AppTestCase(unittest.TestCase):
 
     def setUp(self):
         db.connect()
-        if User.table_exists():
-            db.drop_tables([User])
-        db.create_tables([User])
+        db.create_tables([User], safe=True)
         logging.disable(logging.CRITICAL)
         self.app = app.test_client()
 
@@ -22,110 +25,163 @@ class AppTestCase(unittest.TestCase):
         db.close()
 
     def test_create(self):
-        ''' create correctly a user if all required parameters are send '''
+        ''' Test the creation of a new user '''
         rv = self.app.post('/users', headers={'Content-Type': 'application/json'}, data=json.dumps(good_user_1))
-        data = json.loads(rv.data)
         self.assertEqual(rv.status_code, 201)
+        data = json.loads(rv.data)
         self.assertEqual(data['id'], 1)
-        rv = self.app.post('/users', headers={'Content-Type': 'application/json'}, data=json.dumps(good_user_2))
-        self.assertEqual(rv.status_code, 201)
-        data = json.loads(rv.data)
-        self.assertEqual(data['id'], 2)
 
-        ''' test all cases of missing parameters '''
+        ''' Test for missing email '''
         rv = self.app.post('/users', headers={'Content-Type': 'application/json'}, data=json.dumps(bad_user_1))
         self.assertEqual(rv.status_code, 400)
+
+        ''' Test for missing first_name '''
         rv = self.app.post('/users', headers={'Content-Type': 'application/json'}, data=json.dumps(bad_user_2))
         self.assertEqual(rv.status_code, 400)
+
+        ''' Test for missing last_name '''
         rv = self.app.post('/users', headers={'Content-Type': 'application/json'}, data=json.dumps(bad_user_3))
         self.assertEqual(rv.status_code, 400)
+
+        ''' Test for missing password '''
         rv = self.app.post('/users', headers={'Content-Type': 'application/json'}, data=json.dumps(bad_user_4))
         self.assertEqual(rv.status_code, 400)
+
+        ''' Test for invalid email '''
         rv = self.app.post('/users', headers={'Content-Type': 'application/json'}, data=json.dumps(bad_user_5))
         self.assertEqual(rv.status_code, 400)
 
-        ''' check if an user can't have the same email '''
+        ''' Test for invalid first_name '''
+        rv = self.app.post('/users', headers={'Content-Type': 'application/json'}, data=json.dumps(bad_user_6))
+        self.assertEqual(rv.status_code, 400)
+
+        ''' Test for invalid last_name '''
+        rv = self.app.post('/users', headers={'Content-Type': 'application/json'}, data=json.dumps(bad_user_7))
+        self.assertEqual(rv.status_code, 400)
+
+        ''' Test for invalid is_admin '''
+        rv = self.app.post('/users', headers={'Content-Type': 'application/json'}, data=json.dumps(bad_user_8))
+        self.assertEqual(rv.status_code, 400)
+
+        ''' Test for invalid password '''
+        rv = self.app.post('/users', headers={'Content-Type': 'application/json'}, data=json.dumps(bad_user_9))
+        self.assertEqual(rv.status_code, 400)
+
+        ''' Test if user already exists '''
         rv = self.app.post('/users', headers={'Content-Type': 'application/json'}, data=json.dumps(good_user_1))
         rv = self.assertEqual(rv.status_code, 409)
 
     def test_list(self):
-        ''' return 0 elements if no user was created'''
+        ''' Test that no users exist '''
         rv = self.app.get('/users')
         self.assertEqual(rv.status_code, 200)
         data = json.loads(rv.data)
         self.assertEqual(len(data['result']), 0)
 
-        ''' return 1 element after a user creation'''
+        ''' Create a new user '''
         rv = self.app.post('/users', headers={'Content-Type': 'application/json'}, data=json.dumps(good_user_1))
         self.assertEqual(rv.status_code, 201)
+
+        ''' Test that one user exists '''
         rv = self.app.get('/users')
         self.assertEqual(rv.status_code, 200)
         data = json.loads(rv.data)['result']
         self.assertEqual(len(data), 1)
 
     def test_get(self):
-        ''' create a user and after get it '''
+        ''' Set base data '''
         rv = self.app.post('/users', headers={'Content-Type': 'application/json'}, data=json.dumps(good_user_1))
         self.assertEqual(rv.status_code, 201)
-        rv = self.app.get('/users')
 
-        ''' check the status code '''
-        self.assertEqual(rv.status_code, 200)
-
-        ''' check if it's the same resource as during the creation '''
-        user = json.loads(rv.data)['result'][0]
-        self.assertEqual(user['email'], good_user_1['email'])
-
-        ''' check when trying to get an unknown user (user ID not linked to a user)'''
-        rv = self.app.get('/users/4')
+        ''' Test if user does not exist '''
+        rv = self.app.get('/users/404')
         self.assertEqual(rv.status_code, 404)
 
+        ''' Retrieve newly created user '''
+        rv = self.app.get('/users/1')
+        self.assertEqual(rv.status_code, 200)
+
+        ''' Test that the user is same as created '''
+        user = json.loads(rv.data)
+        self.assertEqual(user['email'], good_user_1['email'])
+
     def test_delete(self):
-        ''' create a user and after delete it '''
+        ''' Set base data '''
         rv = self.app.post('/users', headers={'Content-Type': 'application/json'}, data=json.dumps(good_user_1))
-        before = len(json.loads(self.app.get('/users').data)['result'])
-        rv = self.app.delete('/users/1')
-        after = len(json.loads(self.app.get('/users').data)['result'])
+        self.assertEqual(rv.status_code, 201)
 
-        ''' check the status code '''
-        self.assertEqual(rv.status_code, 200)
-
-        ''' check the number of element before and after a delete '''
-        self.assertEqual(after - before, -1)
-
-        ''' check when trying to delete an unknown user (user ID not linked to a user) '''
-        rv = self.app.delete('/users/200')
-        self.assertEqual(rv.status_code, 200)
+        ''' Test that one user exists '''
         rv = self.app.get('/users')
-        data = json.loads(rv.data)
-        self.assertEqual(len(data['result']), 0)
+        self.assertEqual(rv.status_code, 200)
+        data = json.loads(rv.data)['result']
+        self.assertEqual(len(data), 1)
+
+        ''' Delete the existing user '''
+        rv = self.app.delete('/users/1')
+        self.assertEqual(rv.status_code, 200)
+
+        ''' Test that no users exist '''
+        rv = self.app.get('/users')
+        self.assertEqual(rv.status_code, 200)
+        data = json.loads(rv.data)['result']
+        self.assertEqual(len(data), 0)
+
+        ''' Test delete if the user does not exist '''
+        rv = self.app.delete('/users/404')
+        self.assertEqual(rv.status_code, 404)
 
     def test_update(self):
-        '''create a user and after update it'''
+        ''' Set base data '''
         rv = self.app.post('/users', headers={'Content-Type': 'application/json'}, data=json.dumps(good_user_1))
-        test1 = self.app.put('/users/1', headers={'Content-Type': 'application/json'}, data=json.dumps({'email': 'update@superawesome.com'}))
-        test2 = self.app.put('/users/1', headers={'Content-Type': 'application/json'}, data=json.dumps({'first_name': 'Change'}))
-        test3 = self.app.put('/users/1', headers={'Content-Type': 'application/json'}, data=json.dumps({'last_name': 'User'}))
-        test4 = self.app.put('/users/1', headers={'Content-Type': 'application/json'}, data=json.dumps({'is_admin': False}))
-        test5 = self.app.put('/users/1', headers={'Content-Type': 'application/json'}, data=json.dumps({'password': 'notthesame'}))
+        self.assertEqual(rv.status_code, 201)
 
-        '''check the status code'''
-        self.assertEqual(test1.status_code, 400)
-        self.assertEqual(test2.status_code, 200)
-        self.assertEqual(test3.status_code, 200)
-        self.assertEqual(test4.status_code, 200)
-        self.assertEqual(test5.status_code, 200)
+        ''' Test that email cannot be updated '''
+        rv = self.app.put('/users/1', headers={'Content-Type': 'application/json'}, data=json.dumps({'email': 'update@superawesome.com'}))
+        self.assertEqual(rv.status_code, 403)
 
-        '''check the impact of each request parameters'''
+        ''' Test updating first_name '''
+        rv = self.app.put('/users/1', headers={'Content-Type': 'application/json'}, data=json.dumps({'first_name': 'Change'}))
+        self.assertEqual(rv.status_code, 200)
+
+        ''' Test updating last_name '''
+        rv = self.app.put('/users/1', headers={'Content-Type': 'application/json'}, data=json.dumps({'last_name': 'User'}))
+        self.assertEqual(rv.status_code, 200)
+
+        ''' Test updating is_admin '''
+        rv = self.app.put('/users/1', headers={'Content-Type': 'application/json'}, data=json.dumps({'is_admin': False}))
+        self.assertEqual(rv.status_code, 200)
+
+        ''' Test updating password '''
+        rv = self.app.put('/users/1', headers={'Content-Type': 'application/json'}, data=json.dumps({'password': 'notthesame'}))
+        self.assertEqual(rv.status_code, 200)
+
+        ''' Test for invalid first_name '''
+        rv = self.app.put('/users/1', headers={'Content-Type': 'application/json'}, data=json.dumps({'first_name': 400}))
+        self.assertEqual(rv.status_code, 400)
+
+        ''' Test for invalid last_name '''
+        rv = self.app.put('/users/1', headers={'Content-Type': 'application/json'}, data=json.dumps({'last_name': 400}))
+        self.assertEqual(rv.status_code, 400)
+
+        ''' Test for invalid is_admin '''
+        rv = self.app.put('/users/1', headers={'Content-Type': 'application/json'}, data=json.dumps({'is_admin': 'Nope'}))
+        self.assertEqual(rv.status_code, 400)
+
+        ''' Test for invalid password '''
+        rv = self.app.put('/users/1', headers={'Content-Type': 'application/json'}, data=json.dumps({'password': 400}))
+        self.assertEqual(rv.status_code, 400)
+
+        ''' Test that expected updates occurred '''
         rv = self.app.get('/users/1')
+        self.assertEqual(rv.status_code, 200)
         user = json.loads(rv.data)
         self.assertEqual(user['email'], good_user_1['email'])
         self.assertNotEqual(user['first_name'], good_user_1['first_name'])
         self.assertNotEqual(user['last_name'], good_user_1['last_name'])
         self.assertNotEqual(user['is_admin'], good_user_1['is_admin'])
 
-        '''check when trying to update an unknown user (user ID not linked to a user)'''
-        rv = self.app.put('/users/200', headers={'Content-Type': 'application/json'}, data=json.dumps({'first_name': 'Change'}))
+        ''' Test if user does not exist '''
+        rv = self.app.put('/users/404', headers={'Content-Type': 'application/json'}, data=json.dumps({'first_name': 'Change'}))
         self.assertEqual(rv.status_code, 404)
 
 if __name__ == '__main__':
