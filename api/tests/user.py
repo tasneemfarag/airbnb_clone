@@ -7,7 +7,7 @@ from app.models.user import User
 from user_data import *
 
 ''' Import packages '''
-from datetime import datetime
+from datetime import datetime, timedelta
 import unittest
 import json
 import logging
@@ -26,10 +26,18 @@ class AppTestCase(unittest.TestCase):
 
     def test_create(self):
         ''' Test the creation of a new user '''
+        timestamp = datetime.now()
         rv = self.app.post('/users', headers={'Content-Type': 'application/json'}, data=json.dumps(good_user_1))
         self.assertEqual(rv.status_code, 201)
         data = json.loads(rv.data)
         self.assertEqual(data['id'], 1)
+
+        ''' Test that time created and updated match expected time '''
+        rv = self.app.get('/users/1')
+        self.assertEqual(rv.status_code, 200)
+        data = json.loads(rv.data)
+        self.assertTrue(abs(datetime.strptime(data['created_at'],"%Y/%m/%d %H:%M:%S") - timestamp) < timedelta(seconds=2))
+        self.assertTrue(abs(datetime.strptime(data['updated_at'],"%Y/%m/%d %H:%M:%S") - timestamp) < timedelta(seconds=2))
 
         ''' Test for missing email '''
         rv = self.app.post('/users', headers={'Content-Type': 'application/json'}, data=json.dumps(bad_user_1))
@@ -140,8 +148,16 @@ class AppTestCase(unittest.TestCase):
         self.assertEqual(rv.status_code, 403)
 
         ''' Test updating first_name '''
+        timestamp = datetime.now()
         rv = self.app.put('/users/1', headers={'Content-Type': 'application/json'}, data=json.dumps({'first_name': 'Change'}))
         self.assertEqual(rv.status_code, 200)
+
+        ''' Test that time created and updated match expected time '''
+        rv = self.app.get('/users/1')
+        self.assertEqual(rv.status_code, 200)
+        data = json.loads(rv.data)
+        self.assertFalse(abs(datetime.strptime(data['created_at'],"%Y/%m/%d %H:%M:%S") - timestamp) < timedelta(seconds=2))
+        self.assertTrue(abs(datetime.strptime(data['updated_at'],"%Y/%m/%d %H:%M:%S") - timestamp) < timedelta(seconds=2))
 
         ''' Test updating last_name '''
         rv = self.app.put('/users/1', headers={'Content-Type': 'application/json'}, data=json.dumps({'last_name': 'User'}))
