@@ -61,8 +61,8 @@ def create_state():
         return response, 409
     except KeyError as e:
         response = {}
-        response['code'] = 400
-        response['msg'] = str(e.message) + " is missing"
+        response['code'] = 40000
+        response['msg'] = 'Missing parameters'
         return response, 400
     except Exception as e:
         print e.message

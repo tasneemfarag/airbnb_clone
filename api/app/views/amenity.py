@@ -51,8 +51,8 @@ def create_amenity():
         return res, 201
     except KeyError as e:
         res = {}
-        res['code'] = 400
-        res['msg'] = str(e.message) + ' is missing'
+        res['code'] = 40000
+        res['msg'] = 'Missing parameters'
         return res, 400
     except TypeError as e:
         res = {}

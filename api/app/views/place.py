@@ -97,8 +97,8 @@ def create_place():
         return res, 201
     except KeyError as e:
         res = {}
-        res['code'] = 400
-        res['msg'] = str(e.message) + " is missing"
+        res['code'] = 40000
+        res['msg'] = 'Missing parameters'
         return res, 400
     except TypeError as e:
         res = {}
@@ -311,7 +311,7 @@ def create_place_by_city(state_id, city_id):
         query = User.select().where(User.id == data['owner_id'])
         if not query.exists():
             raise LookupError('owner_id')
-        
+
         new = Place(
             owner = data['owner_id'],
             name = data['name'],
@@ -339,8 +339,8 @@ def create_place_by_city(state_id, city_id):
         return res, 201
     except KeyError as e:
         res = {}
-        res['code'] = 400
-        res['msg'] = str(e.message) + " is missing"
+        res['code'] = 40000
+        res['msg'] = 'Missing parameters'
         return res, 400
     except LookupError as e:
         abort(404)

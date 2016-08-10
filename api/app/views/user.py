@@ -71,8 +71,8 @@ def create_user():
         return res, 201
     except KeyError as e:
         res = {}
-        res['code'] = 400
-        res['msg'] = "Request is missing " + str(e.message)
+        res['code'] = 40000
+        res['msg'] = 'Missing parameters'
         return res, 400
     except TypeError as e:
         res = {}
