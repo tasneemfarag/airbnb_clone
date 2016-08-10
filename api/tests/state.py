@@ -1,16 +1,21 @@
+''' Import app and models '''
 from app import app
 from app.models.base import db
 from app.models.state import State
+
+''' Import test data '''
+from state_data import *
+
+''' Import packages '''
 import unittest
 import json
 import logging
-from state_data import *
 
 class AppTestCase(unittest.TestCase):
 
     def setUp(self):
         db.connect()
-        db.create_tables([State])
+        db.create_tables([State], safe=True)
         logging.disable(logging.CRITICAL)
         self.app = app.test_client()
 
@@ -19,7 +24,7 @@ class AppTestCase(unittest.TestCase):
         db.close()
 
     def test_create(self):
-        ''' create correctly a state if all required parameters are send '''
+        ''' Test the create with valid data '''
         rv = self.app.post('/states', headers={'Content-Type': 'application/json'}, data=json.dumps(good_state_1))
         self.assertEqual(rv.status_code, 201)
         data = json.loads(rv.data)
@@ -29,63 +34,80 @@ class AppTestCase(unittest.TestCase):
         data = json.loads(rv.data)
         self.assertEqual(data['id'], 2)
 
-        ''' test all cases of missing parameters '''
+        ''' Test if state is NULL '''
         rv = self.app.post('/states', headers={'Content-Type': 'application/json'}, data=json.dumps(bad_state_1))
         self.assertEqual(rv.status_code, 400)
+
+        ''' Test if name  value type is invalid '''
         rv = self.app.post('/states', headers={'Content-Type': 'application/json'}, data=json.dumps(bad_state_2))
         self.assertEqual(rv.status_code, 400)
+
+        ''' Test if name key is missing '''
         rv = self.app.post('/states', headers={'Content-Type': 'application/json'}, data=json.dumps(bad_state_3))
         self.assertEqual(rv.status_code, 400)
 
-        ''' check if a state can't have the same email '''
+        ''' Test that two states cannot be the same name '''
         rv = self.app.post('/states', headers={'Content-Type': 'application/json'}, data=json.dumps(good_state_1))
         rv = self.assertEqual(rv.status_code, 409)
 
     def test_list(self):
-        ''' return 0 elements if no state was created'''
+        ''' Test that there are no states returned '''
         rv = self.app.get('/states')
         self.assertEqual(rv.status_code, 200)
         data = json.loads(rv.data)['result']
         self.assertEqual(len(data), 0)
 
-        ''' return 1 element after a state creation'''
+        ''' Create a new state '''
         rv = self.app.post('/states', headers={'Content-Type': 'application/json'}, data=json.dumps(good_state_1))
+        self.assertEqual(rv.status_code, 201)
+
+        ''' Test that there is one state returned '''
         rv = self.app.get('/states')
+        self.assertEqual(rv.status_code, 200)
         data = json.loads(rv.data)['result']
         self.assertEqual(len(data), 1)
 
     def test_get(self):
-        ''' create a state and after get it '''
+        ''' Set base data '''
         rv = self.app.post('/states', headers={'Content-Type': 'application/json'}, data=json.dumps(good_state_1))
-        rv = self.app.get('/states/1')
+        self.assertEqual(rv.status_code, 201)
 
-        ''' check the status code '''
-        self.assertEqual(rv.status_code, 200)
-
-        ''' check if it's the same resource as during the creation '''
-        state = json.loads(rv.data)
-        self.assertEqual(state['name'], good_state_1['name'])
-
-        ''' check when trying to get an unknown state '''
-        rv = self.app.get('/states/500')
+        ''' Test if state doesn't exist '''
+        rv = self.app.get('/states/404')
         self.assertEqual(rv.status_code, 404)
 
+        ''' Retrieve the newly created state '''
+        rv = self.app.get('/states/1')
+        self.assertEqual(rv.status_code, 200)
+
+        ''' Confirm retrieved state is the created state '''
+        data = json.loads(rv.data)
+        self.assertEqual(data['name'], good_state_1['name'])
+
     def test_delete(self):
-        ''' create a state and after delete it '''
+        ''' Set base data '''
         rv = self.app.post('/states', headers={'Content-Type': 'application/json'}, data=json.dumps(good_state_1))
-        before = len(json.loads(self.app.get('/states').data)['result'])
+        self.assertEqual(rv.status_code, 201)
+
+        ''' Test if state doesn't exist '''
+        rv = self.app.delete('/states/404')
+        self.assertEqual(rv.status_code, 404)
+
+        ''' Test that one state exists '''
+        rv = self.app.get('/states')
+        self.assertEqual(rv.status_code, 200)
+        data = json.loads(rv.data)['result']
+        self.assertEqual(len(data), 1)
+
+        ''' Delete the existing state '''
         rv = self.app.delete('/states/1')
-        after = len(json.loads(self.app.get('/states').data)['result'])
-
-        ''' check the status code '''
         self.assertEqual(rv.status_code, 200)
 
-        ''' check the number of element before and after a delete '''
-        self.assertEqual(after - before, -1)
-
-        ''' check when trying to delete an unknown state '''
-        rv = self.app.delete('/states/500')
+        ''' Test that there are no states '''
+        rv = self.app.get('/states')
         self.assertEqual(rv.status_code, 200)
+        data = json.loads(rv.data)['result']
+        self.assertEqual(len(data), 0)
 
 if __name__ == '__main__':
     unittest.main()
