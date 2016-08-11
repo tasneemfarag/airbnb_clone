@@ -24,7 +24,7 @@ def get_place_bookings(place_id):
         booked_dates = []
         data = PlaceBook.select().where(PlaceBook.place == place_id)
         for row in data:
-            booked_dates.append(row.to_hash())
+            booked_dates.append(row.to_dict())
         return {"result": booked_dates}, 200
     except LookupError as e:
         abort(404)
@@ -133,7 +133,7 @@ def get_booking(place_id, book_id):
 
         ''' Return booking data '''
         booking = PlaceBook.get(PlaceBook.id == book_id, PlaceBook.place == place_id)
-        return booking.to_hash(), 200
+        return booking.to_dict(), 200
     except LookupError as e:
         abort(404)
     except Exception as e:

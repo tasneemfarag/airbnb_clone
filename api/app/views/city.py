@@ -23,7 +23,7 @@ def get_cities(state_id):
         cities = []
         data = City.select().where(City.state == state_id)
         for row in data:
-            cities.append(row.to_hash())
+            cities.append(row.to_dict())
         return {"result": cities}, 200
     except LookupError as e:
         abort(404)
@@ -101,7 +101,7 @@ def get_city(state_id, city_id):
 
         ''' Return city data '''
         city = City.get(City.id == city_id, City.state == state_id)
-        return city.to_hash(), 200
+        return city.to_dict(), 200
     except LookupError as e:
         abort(404)
     except Exception as e:

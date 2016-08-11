@@ -19,7 +19,7 @@ def get_places():
     places = []
     data = Place.select()
     for row in data:
-        places.append(row.to_hash())
+        places.append(row.to_dict())
     return {"result": places}, 200
 
 @app.route('/places', methods=['POST'])
@@ -123,7 +123,7 @@ def get_place(place_id):
 
         ''' Return place data '''
         place = Place.get(Place.id == place_id)
-        return place.to_hash(), 200
+        return place.to_dict(), 200
     except LookupError as e:
         abort(404)
     except Exception as e:
@@ -250,7 +250,7 @@ def get_places_by_city(state_id, city_id):
         places = []
         data = Place.select().where(Place.city == city.id)
         for row in data:
-            places.append(row.to_hash())
+            places.append(row.to_dict())
         return {"result": places}, 200
     except LookupError as e:
         abort(404)
@@ -377,7 +377,7 @@ def get_places_by_state(state_id):
         results = []
         data = Place.select().where(Place.city << cities)
         for row in data:
-            results.append(row.to_hash())
+            results.append(row.to_dict())
         return {"result": results}, 200
     except LookupError as e:
         abort(404)

@@ -21,11 +21,11 @@ def get_user_reviews(user_id):
 		''' Get list of reviews for the user '''
 		reviews = ReviewUser.select().where(ReviewUser.user == user_id)
 
-		''' For each review get to_hash and add touserid key '''
+		''' For each review get to_dict and add touserid key '''
 		results = []
 		for review in reviews:
 			result = Review.get(Review.id == review.review)
-			data = result.to_hash()
+			data = result.to_dict()
 			data['touserid'] = int(user_id)
 			results.append(data)
 
@@ -119,7 +119,7 @@ def get_user_review(user_id, review_id):
 		if not query.exists():
 			raise LookupError('Not found')
 		query = Review.get(Review.id == review_id)
-		data = query.to_hash()
+		data = query.to_dict()
 		data['touserid'] = user_id
 		return data, 200
 	except LookupError as e:
@@ -162,11 +162,11 @@ def get_place_reviews(place_id):
 		''' Get list of reviews for the user '''
 		reviews = ReviewPlace.select().where(ReviewPlace.place == place_id)
 
-		''' For each review get to_hash and add touserid key '''
+		''' For each review get to_dict and add touserid key '''
 		results = []
 		for review in reviews:
 			result = Review.get(Review.id == review.review)
-			data = result.to_hash()
+			data = result.to_dict()
 			data['toplaceid'] = int(place_id)
 			results.append(data)
 
@@ -253,7 +253,7 @@ def get_place_review(place_id, review_id):
 		if not query.exists():
 			raise LookupError('Not found')
 		query = Review.get(Review.id == review_id)
-		data = query.to_hash()
+		data = query.to_dict()
 		data['toplaceid'] = place_id
 		return data, 200
 	except LookupError as e:

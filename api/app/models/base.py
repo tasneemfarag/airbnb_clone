@@ -15,7 +15,7 @@ class BaseModel(Model):
         self.updated_at = datetime.now()
         super(BaseModel, self).save()
 
-    def to_hash(model, self, data):
+    def to_dict(model, self, data):
         ''' Returns a hash of the BaseModel in the database '''
         data['id'] = self.id
         data['created_at'] = self.created_at.strftime("%Y/%m/%d %H:%M:%S")

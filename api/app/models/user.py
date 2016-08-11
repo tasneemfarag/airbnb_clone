@@ -15,11 +15,11 @@ class User(BaseModel):
         passwd.update(clear_password)
         self.password = passwd.hexdigest()
 
-    def to_hash(self):
+    def to_dict(self):
         ''' Returns a hash of the User in the database '''
         data = {}
         data['email'] = self.email
         data['first_name'] = self.first_name
         data['last_name'] = self.last_name
         data['is_admin'] = self.is_admin
-        return super(User, self).to_hash(self, data)
+        return super(User, self).to_dict(self, data)

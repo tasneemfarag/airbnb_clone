@@ -15,7 +15,7 @@ def get_users():
     users = []
     data = User.select()
     for row in data:
-        users.append(row.to_hash())
+        users.append(row.to_dict())
     return {"result": users}, 200
 
 @app.route('/users', methods=['POST'])
@@ -99,7 +99,7 @@ def get_user(user_id):
 
         ''' Return user data '''
         user = User.get(User.id == user_id)
-        return user.to_hash(), 200
+        return user.to_dict(), 200
     except LookupError as e:
         abort(404)
     except Exception as e:

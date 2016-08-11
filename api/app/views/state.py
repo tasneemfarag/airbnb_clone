@@ -13,7 +13,7 @@ def get_states():
         states = []
         data = State.select()
         for row in data:
-            states.append(row.to_hash())
+            states.append(row.to_dict())
         return {"result": states}, 200
     except Exception as e:
         abort(500)
@@ -79,7 +79,7 @@ def get_state(state_id):
             raise LookupError('state_id')
 
         state = State.get(State.id == state_id)
-        return state.to_hash(), 200
+        return state.to_dict(), 200
     except LookupError as e:
         abort(404)
     except Exception as e:

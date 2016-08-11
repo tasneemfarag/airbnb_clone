@@ -18,7 +18,7 @@ def get_amenities():
     amenities = []
     data = Amenity.select()
     for row in data:
-        amenities.append(row.to_hash())
+        amenities.append(row.to_dict())
     return {"result": amenities}, 200
 
 @app.route('/amenities', methods=['POST'])
@@ -79,7 +79,7 @@ def get_amenity(amenity_id):
 
         ''' Return amenity data '''
         amenity = Amenity.get(Amenity.id == amenity_id)
-        return amenity.to_hash(), 200
+        return amenity.to_dict(), 200
     except LookupError as e:
         abort(404)
     except Exception as e:
@@ -121,7 +121,7 @@ def get_place_amenities(place_id):
         amenities = []
         data = Amenity.select().join(PlaceAmenities).where(PlaceAmenities.place == place_id)
         for row in data:
-            amenities.append(row.to_hash())
+            amenities.append(row.to_dict())
         return {"result": amenities}, 200
     except LookupError as e:
         abort(404)
