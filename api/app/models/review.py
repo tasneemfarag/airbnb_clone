@@ -9,9 +9,16 @@ class Review(BaseModel):
 
 	def to_dict(self):
 		''' Returns a hash of the Review in the database '''
-		user = User.get(User.id == self.user)
 		data = {}
 		data['message'] = self.message
 		data['stars'] = self.stars
-		data['fromuserid'] = user.id
+		data['fromuserid'] = self.user_id
+		if 'reviewuser' in dir(self):
+			data['touserid'] = self.reviewuser.user_id
+		else:
+			data['touserid'] = None
+		if 'reviewplace' in dir(self):
+			data['toplaceid'] = self.reviewplace.place_id
+		else:
+			data['toplaceid'] = None
 		return super(Review, self).to_dict(self, data)

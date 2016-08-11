@@ -1,9 +1,13 @@
+''' Import app and models '''
 from app import app
-from app.models.review import Review
 from app.models.review_place import ReviewPlace
 from app.models.review_user import ReviewUser
+from app.models.review import Review
 from app.models.user import User
 from app.models.place import Place
+from return_styles import ListStyle
+
+''' Import packages '''
 from flask_json import as_json, request
 from datetime import datetime
 from flask import abort
@@ -18,22 +22,13 @@ def get_user_reviews(user_id):
 		if not query.exists():
 			raise LookupError('user_id')
 
-		''' Get list of reviews for the user '''
-		reviews = ReviewUser.select().where(ReviewUser.user == user_id)
-
-		''' For each review get to_dict and add touserid key '''
-		results = []
-		for review in reviews:
-			result = Review.get(Review.id == review.review)
-			data = result.to_dict()
-			data['touserid'] = int(user_id)
-			results.append(data)
-
-		''' Return response '''
-		return {'result': results}, 200
+		''' Get list of reviews for the user and return response '''
+		reviews = Review.select(Review, ReviewUser).join(ReviewUser).where(ReviewUser.user == user_id)
+		return ListStyle.list(reviews, request), 200
 	except LookupError as e:
 		abort(404)
 	except Exception as e:
+		print e.message
 		res = {
 			'code': 500,
 			'msg': e.message
@@ -160,18 +155,8 @@ def get_place_reviews(place_id):
 			raise LookupError('place_id')
 
 		''' Get list of reviews for the user '''
-		reviews = ReviewPlace.select().where(ReviewPlace.place == place_id)
-
-		''' For each review get to_dict and add touserid key '''
-		results = []
-		for review in reviews:
-			result = Review.get(Review.id == review.review)
-			data = result.to_dict()
-			data['toplaceid'] = int(place_id)
-			results.append(data)
-
-		''' Return response '''
-		return {'result': results}, 200
+		reviews = Review.select(Review, ReviewPlace).join(ReviewPlace).where(ReviewPlace.place == place_id)
+		return ListStyle.list(reviews, request), 200
 	except LookupError as e:
 		abort(404)
 	except Exception as e:

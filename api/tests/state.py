@@ -54,7 +54,7 @@ class AppTestCase(unittest.TestCase):
         ''' Test that there are no states returned '''
         rv = self.app.get('/states')
         self.assertEqual(rv.status_code, 200)
-        data = json.loads(rv.data)['result']
+        data = json.loads(rv.data)['data']
         self.assertEqual(len(data), 0)
 
         ''' Create a new state '''
@@ -64,7 +64,7 @@ class AppTestCase(unittest.TestCase):
         ''' Test that there is one state returned '''
         rv = self.app.get('/states')
         self.assertEqual(rv.status_code, 200)
-        data = json.loads(rv.data)['result']
+        data = json.loads(rv.data)['data']
         self.assertEqual(len(data), 1)
 
     def test_get(self):
@@ -96,7 +96,7 @@ class AppTestCase(unittest.TestCase):
         ''' Test that one state exists '''
         rv = self.app.get('/states')
         self.assertEqual(rv.status_code, 200)
-        data = json.loads(rv.data)['result']
+        data = json.loads(rv.data)['data']
         self.assertEqual(len(data), 1)
 
         ''' Delete the existing state '''
@@ -106,7 +106,7 @@ class AppTestCase(unittest.TestCase):
         ''' Test that there are no states '''
         rv = self.app.get('/states')
         self.assertEqual(rv.status_code, 200)
-        data = json.loads(rv.data)['result']
+        data = json.loads(rv.data)['data']
         self.assertEqual(len(data), 0)
 
 if __name__ == '__main__':

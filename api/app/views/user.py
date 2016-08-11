@@ -1,6 +1,7 @@
 ''' Import app and models '''
 from app import app
 from app.models.user import User
+from return_styles import ListStyle
 
 ''' Import packages '''
 from flask_json import as_json, request
@@ -12,11 +13,8 @@ import json
 @as_json
 def get_users():
     ''' Returns all users in list named result '''
-    users = []
     data = User.select()
-    for row in data:
-        users.append(row.to_dict())
-    return {"result": users}, 200
+    return ListStyle.list(data, request), 200
 
 @app.route('/users', methods=['POST'])
 @as_json

@@ -1,6 +1,10 @@
-from app.models.state import State
-from flask_json import as_json, request
+''' Import app and models '''
 from app import app
+from app.models.state import State
+from return_styles import ListStyle
+
+''' Import packages '''
+from flask_json import as_json, request
 from datetime import datetime
 from flask import abort
 import json
@@ -10,11 +14,8 @@ import json
 def get_states():
     try:
         ''' Returns a list of states in list named result '''
-        states = []
         data = State.select()
-        for row in data:
-            states.append(row.to_dict())
-        return {"result": states}, 200
+        return ListStyle.list(data, request), 200
     except Exception as e:
         abort(500)
 

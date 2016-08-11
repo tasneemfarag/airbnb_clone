@@ -2,6 +2,7 @@
 from app import app
 from app.models.city import City
 from app.models.city import State
+from return_styles import ListStyle
 
 ''' Import packages '''
 from flask_json import as_json, request
@@ -20,11 +21,8 @@ def get_cities(state_id):
             raise LookupError('state')
 
         ''' Return list of cities in given state '''
-        cities = []
         data = City.select().where(City.state == state_id)
-        for row in data:
-            cities.append(row.to_dict())
-        return {"result": cities}, 200
+        return ListStyle.list(data, request), 200
     except LookupError as e:
         abort(404)
     except Exception as e:

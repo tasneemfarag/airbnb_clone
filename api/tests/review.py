@@ -4,12 +4,12 @@ from app import app
 ''' Model import '''
 from app.models.base import db
 from app.models.user import User
+from app.models.review_user import ReviewUser
+from app.models.review_place import ReviewPlace
 from app.models.review import Review
 from app.models.place import Place
 from app.models.city import City
 from app.models.state import State
-from app.models.review_user import ReviewUser
-from app.models.review_place import ReviewPlace
 
 ''' Test data import '''
 from review_data import *
@@ -107,7 +107,7 @@ class AppTestCase(unittest.TestCase):
 
 		''' Test if no user reviews '''
 		rv = self.app.get('/users/1/reviews')
-		data = json.loads(rv.data)['result']
+		data = json.loads(rv.data)['data']
 		self.assertEqual(len(data), 0)
 
 		''' Test if 1 user review '''
@@ -116,7 +116,7 @@ class AppTestCase(unittest.TestCase):
 		data = json.loads(rv.data)
 		self.assertEqual(data['id'], 1)
 		rv = self.app.get('/users/1/reviews')
-		data = json.loads(rv.data)['result']
+		data = json.loads(rv.data)['data']
 		self.assertEqual(len(data), 1)
 
 	def test_get_user_review(self):
@@ -124,7 +124,7 @@ class AppTestCase(unittest.TestCase):
 		rv = self.app.post('/users', headers={'Content-Type': 'application/json'}, data=json.dumps(good_user_1))
 		self.assertEqual(rv.status_code, 201)
 		rv = self.app.get('/users/1/reviews')
-		data = json.loads(rv.data)['result']
+		data = json.loads(rv.data)['data']
 		self.assertEqual(len(data), 0)
 		rv = self.app.post('/users/1/reviews', headers={'Content-Type': 'application/json'}, data=json.dumps(good_review_1))
 		self.assertEqual(rv.status_code, 201)
@@ -151,7 +151,7 @@ class AppTestCase(unittest.TestCase):
 		rv = self.app.post('/users', headers={'Content-Type': 'application/json'}, data=json.dumps(good_user_1))
 		self.assertEqual(rv.status_code, 201)
 		rv = self.app.get('/users/1/reviews')
-		data = json.loads(rv.data)['result']
+		data = json.loads(rv.data)['data']
 		self.assertEqual(len(data), 0)
 		rv = self.app.post('/users/1/reviews', headers={'Content-Type': 'application/json'}, data=json.dumps(good_review_1))
 		self.assertEqual(rv.status_code, 201)
@@ -249,7 +249,7 @@ class AppTestCase(unittest.TestCase):
 
 		''' Test if no place reviews '''
 		rv = self.app.get('/places/1/reviews')
-		data = json.loads(rv.data)['result']
+		data = json.loads(rv.data)['data']
 		self.assertEqual(len(data), 0)
 
 		''' Test if 1 place review '''
@@ -258,7 +258,7 @@ class AppTestCase(unittest.TestCase):
 		data = json.loads(rv.data)
 		self.assertEqual(data['id'], 1)
 		rv = self.app.get('/places/1/reviews')
-		data = json.loads(rv.data)['result']
+		data = json.loads(rv.data)['data']
 		self.assertEqual(len(data), 1)
 
 	def test_get_place_review(self):

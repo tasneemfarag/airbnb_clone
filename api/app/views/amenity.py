@@ -3,6 +3,7 @@ from app import app
 from app.models.amenity import Amenity
 from app.models.place import Place
 from app.models.place_amenity import PlaceAmenities
+from return_styles import ListStyle
 
 ''' Import packages '''
 from flask_json import as_json, request
@@ -15,11 +16,8 @@ import json
 @as_json
 def get_amenities():
     ''' Returns all amenities in a list named result '''
-    amenities = []
     data = Amenity.select()
-    for row in data:
-        amenities.append(row.to_dict())
-    return {"result": amenities}, 200
+    return ListStyle.list(data, request), 200
 
 @app.route('/amenities', methods=['POST'])
 @as_json
@@ -118,11 +116,8 @@ def get_place_amenities(place_id):
             raise LookupError('place_id')
 
         ''' Return amenities for the given place '''
-        amenities = []
         data = Amenity.select().join(PlaceAmenities).where(PlaceAmenities.place == place_id)
-        for row in data:
-            amenities.append(row.to_dict())
-        return {"result": amenities}, 200
+        return ListStyle.list(data, request), 200
     except LookupError as e:
         abort(404)
     except Exception as e:

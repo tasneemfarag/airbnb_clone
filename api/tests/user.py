@@ -73,19 +73,19 @@ class AppTestCase(unittest.TestCase):
 
     def test_list(self):
         ''' Test that no users exist '''
-        rv = self.app.get('/users')
+        rv = self.app.get('/users?page=1&number=1')
         self.assertEqual(rv.status_code, 200)
         data = json.loads(rv.data)
-        self.assertEqual(len(data['result']), 0)
+        self.assertEqual(len(data['data']), 0)
 
         ''' Create a new user '''
         rv = self.app.post('/users', headers={'Content-Type': 'application/json'}, data=json.dumps(good_user_1))
         self.assertEqual(rv.status_code, 201)
 
         ''' Test that one user exists '''
-        rv = self.app.get('/users')
+        rv = self.app.get('/users?page=1&number=1')
         self.assertEqual(rv.status_code, 200)
-        data = json.loads(rv.data)['result']
+        data = json.loads(rv.data)['data']
         self.assertEqual(len(data), 1)
 
     def test_get(self):
@@ -113,7 +113,7 @@ class AppTestCase(unittest.TestCase):
         ''' Test that one user exists '''
         rv = self.app.get('/users')
         self.assertEqual(rv.status_code, 200)
-        data = json.loads(rv.data)['result']
+        data = json.loads(rv.data)['data']
         self.assertEqual(len(data), 1)
 
         ''' Delete the existing user '''
@@ -123,7 +123,7 @@ class AppTestCase(unittest.TestCase):
         ''' Test that no users exist '''
         rv = self.app.get('/users')
         self.assertEqual(rv.status_code, 200)
-        data = json.loads(rv.data)['result']
+        data = json.loads(rv.data)['data']
         self.assertEqual(len(data), 0)
 
         ''' Test delete if the user does not exist '''

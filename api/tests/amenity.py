@@ -60,7 +60,7 @@ class AppTestCase(unittest.TestCase):
         ''' Check if no amenities '''
         rv = self.app.get('/amenities')
         self.assertEqual(rv.status_code, 200)
-        data = json.loads(rv.data)['result']
+        data = json.loads(rv.data)['data']
         self.assertEqual(len(data), 0)
 
         ''' Create new amenity '''
@@ -70,7 +70,7 @@ class AppTestCase(unittest.TestCase):
         ''' Check if one amenity '''
         rv = self.app.get('/amenities')
         self.assertEqual(rv.status_code, 200)
-        data = json.loads(rv.data)['result']
+        data = json.loads(rv.data)['data']
         self.assertEqual(len(data), 1)
 
     def test_get(self):
@@ -103,7 +103,7 @@ class AppTestCase(unittest.TestCase):
 
         ''' Test number of amenities before delete '''
         rv = self.app.get('/amenities')
-        data = json.loads(rv.data)['result']
+        data = json.loads(rv.data)['data']
         self.assertEqual(len(data), 1)
 
         ''' Delete the existing amenity '''
@@ -112,7 +112,7 @@ class AppTestCase(unittest.TestCase):
 
         ''' Test number of amenities after delete '''
         rv = self.app.get('/amenities')
-        data = json.loads(rv.data)['result']
+        data = json.loads(rv.data)['data']
         self.assertEqual(len(data), 0)
 
     def test_create_place_amenity(self):
@@ -164,7 +164,7 @@ class AppTestCase(unittest.TestCase):
         ''' Confirm there are no place amenities '''
         rv = self.app.get('/places/1/amenities')
         self.assertEqual(rv.status_code, 200)
-        data = json.loads(rv.data)['result']
+        data = json.loads(rv.data)['data']
         self.assertEqual(len(data), 0)
 
         ''' Create new amenity for place '''
@@ -174,7 +174,7 @@ class AppTestCase(unittest.TestCase):
         ''' Confirm there is one place amenity '''
         rv = self.app.get('/places/1/amenities')
         self.assertEqual(rv.status_code, 200)
-        data = json.loads(rv.data)['result']
+        data = json.loads(rv.data)['data']
         self.assertEqual(len(data), 1)
 
     def test_delete_place_amenity(self):
@@ -209,7 +209,7 @@ class AppTestCase(unittest.TestCase):
         ''' Test deletion of place amenity '''
         rv = self.app.get('/places/1/amenities')
         self.assertEqual(rv.status_code, 200)
-        data = json.loads(rv.data)['result']
+        data = json.loads(rv.data)['data']
         self.assertEqual(len(data), 1)
 
         rv = self.app.delete('/places/1/amenities/1')
@@ -217,7 +217,7 @@ class AppTestCase(unittest.TestCase):
 
         rv = self.app.get('/places/1/amenities')
         self.assertEqual(rv.status_code, 200)
-        data = json.loads(rv.data)['result']
+        data = json.loads(rv.data)['data']
         self.assertEqual(len(data), 0)
 
 if __name__ == '__main__':

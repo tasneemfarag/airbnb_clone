@@ -73,7 +73,7 @@ class AppTestCase(unittest.TestCase):
         ''' Test that no cities exist '''
         rv = self.app.get('/states/1/cities')
         self.assertEqual(rv.status_code, 200)
-        data = json.loads(rv.data)['result']
+        data = json.loads(rv.data)['data']
         self.assertEqual(len(data), 0)
 
         ''' Create a new city '''
@@ -82,7 +82,7 @@ class AppTestCase(unittest.TestCase):
 
         ''' return 1 element after a state creation'''
         rv = self.app.get('/states/1/cities')
-        data = json.loads(rv.data)['result']
+        data = json.loads(rv.data)['data']
         self.assertEqual(len(data), 1)
 
     def test_get(self):
@@ -123,7 +123,7 @@ class AppTestCase(unittest.TestCase):
 
         ''' Check the a city exists '''
         rv = self.app.get('/states/1/cities')
-        data = json.loads(rv.data)['result']
+        data = json.loads(rv.data)['data']
         self.assertEqual(len(data), 1)
 
         ''' Delete the existing city '''
@@ -132,7 +132,7 @@ class AppTestCase(unittest.TestCase):
 
         ''' Check that the city was deleted '''
         rv = self.app.get('/states/1/cities')
-        data = json.loads(rv.data)['result']
+        data = json.loads(rv.data)['data']
         self.assertEqual(len(data), 0)
 
 if __name__ == '__main__':

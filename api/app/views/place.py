@@ -5,6 +5,7 @@ from app.models.city import City
 from app.models.state import State
 from app.models.user import User
 from app.models.place_book import PlaceBook
+from return_styles import ListStyle
 
 ''' Import packages '''
 from flask_json import as_json, request
@@ -16,11 +17,8 @@ import json
 @as_json
 def get_places():
     ''' Returns all places in a list named result '''
-    places = []
     data = Place.select()
-    for row in data:
-        places.append(row.to_dict())
-    return {"result": places}, 200
+    return ListStyle.list(data, request), 200
 
 @app.route('/places', methods=['POST'])
 @as_json
@@ -247,11 +245,8 @@ def get_places_by_city(state_id, city_id):
             raise LookupError('city_id, state_id')
 
         ''' Return all places in the given city '''
-        places = []
         data = Place.select().where(Place.city == city.id)
-        for row in data:
-            places.append(row.to_dict())
-        return {"result": places}, 200
+        return ListStyle.list(data, request), 200
     except LookupError as e:
         abort(404)
     except Exception as error:
@@ -367,18 +362,14 @@ def get_places_by_state(state_id):
         ''' Create a list of city ids in the state '''
         query = City.select().where(City.state == state_id)
         if not query.exists():
-            results = []
-            return {"result": results}, 200
+            return ListStyle.list(query, request), 200
         cities = []
         for city in query:
             cities.append(city.id)
 
         ''' Return the places in listed cities '''
-        results = []
         data = Place.select().where(Place.city << cities)
-        for row in data:
-            results.append(row.to_dict())
-        return {"result": results}, 200
+        return ListStyle.list(data, request), 200
     except LookupError as e:
         abort(404)
     except Exception as e:

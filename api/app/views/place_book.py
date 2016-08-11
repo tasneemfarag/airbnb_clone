@@ -3,6 +3,7 @@ from app import app
 from app.models.place_book import PlaceBook
 from app.models.place import Place
 from app.models.user import User
+from return_styles import ListStyle
 
 ''' Import packages '''
 from flask_json import as_json, request
@@ -21,11 +22,8 @@ def get_place_bookings(place_id):
             raise LookupError('place_id')
 
         ''' Return list of bookings for the given place '''
-        booked_dates = []
         data = PlaceBook.select().where(PlaceBook.place == place_id)
-        for row in data:
-            booked_dates.append(row.to_dict())
-        return {"result": booked_dates}, 200
+        return ListStyle.list(data, request), 200
     except LookupError as e:
         abort(404)
     except Exception as e:

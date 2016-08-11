@@ -124,7 +124,7 @@ class AppTestCase(unittest.TestCase):
         ''' Test that there are currently no places '''
         rv = self.app.get('/places')
         self.assertEqual(rv.status_code, 200)
-        data = json.loads(rv.data)['result']
+        data = json.loads(rv.data)['data']
         self.assertEqual(len(data), 0)
 
         ''' Create a new place '''
@@ -134,7 +134,7 @@ class AppTestCase(unittest.TestCase):
         ''' Test that there is one place '''
         rv = self.app.get('/places')
         self.assertEqual(rv.status_code, 200)
-        data = json.loads(rv.data)['result']
+        data = json.loads(rv.data)['data']
         self.assertEqual(len(data), 1)
 
     def test_get(self):
@@ -178,7 +178,7 @@ class AppTestCase(unittest.TestCase):
         ''' Test that one place exists '''
         rv = self.app.get('/places')
         self.assertEqual(rv.status_code, 200)
-        data = json.loads(rv.data)['result']
+        data = json.loads(rv.data)['data']
         self.assertEqual(len(data), 1)
 
         ''' Delete the existing place '''
@@ -188,7 +188,7 @@ class AppTestCase(unittest.TestCase):
         ''' Test that no places exist '''
         rv = self.app.get('/places')
         self.assertEqual(rv.status_code, 200)
-        data = json.loads(rv.data)['result']
+        data = json.loads(rv.data)['data']
         self.assertEqual(len(data), 0)
 
     def test_update(self):
@@ -354,7 +354,7 @@ class AppTestCase(unittest.TestCase):
         ''' Test that no places exist for city '''
         rv = self.app.get('/states/1/cities/1/places')
         self.assertEqual(rv.status_code, 200)
-        data = json.loads(rv.data)['result']
+        data = json.loads(rv.data)['data']
         self.assertEqual(len(data), 0)
 
         ''' Create new place in city '''
@@ -364,7 +364,7 @@ class AppTestCase(unittest.TestCase):
         ''' Test that one place exists in the city '''
         rv = self.app.get('/states/1/cities/1/places')
         self.assertEqual(rv.status_code, 200)
-        data = json.loads(rv.data)['result']
+        data = json.loads(rv.data)['data']
         self.assertEqual(len(data), 1)
 
         ''' Test if state_id does not exist '''
@@ -397,13 +397,13 @@ class AppTestCase(unittest.TestCase):
         ''' Test if state has no cities '''
         rv = self.app.get('/states/2/places')
         self.assertEqual(rv.status_code, 200)
-        data = json.loads(rv.data)['result']
+        data = json.loads(rv.data)['data']
         self.assertEqual(len(data), 0)
 
         ''' Test if state has no places '''
         rv = self.app.get('/states/1/places')
         self.assertEqual(rv.status_code, 200)
-        data = json.loads(rv.data)['result']
+        data = json.loads(rv.data)['data']
         self.assertEqual(len(data), 0)
 
         ''' Create new place in city '''
@@ -413,7 +413,7 @@ class AppTestCase(unittest.TestCase):
         ''' Test that new place is returned by state '''
         rv = self.app.get('/states/1/places')
         self.assertEqual(rv.status_code, 200)
-        data = json.loads(rv.data)['result']
+        data = json.loads(rv.data)['data']
         self.assertEqual(len(data), 1)
 
     def test_place_availability(self):

@@ -125,7 +125,7 @@ class AppTestCase(unittest.TestCase):
         ''' Confirm no bookings exist '''
         rv = self.app.get('/places/1/books')
         self.assertEqual(rv.status_code, 200)
-        data = json.loads(rv.data)['result']
+        data = json.loads(rv.data)['data']
         self.assertEqual(len(data), 0)
 
         ''' Create new booking '''
@@ -135,7 +135,7 @@ class AppTestCase(unittest.TestCase):
         ''' Confirm one booking exists '''
         rv = self.app.get('/places/1/books')
         self.assertEqual(rv.status_code, 200)
-        data = json.loads(rv.data)['result']
+        data = json.loads(rv.data)['data']
         self.assertEqual(len(data), 1)
 
     def test_get(self):
@@ -193,7 +193,7 @@ class AppTestCase(unittest.TestCase):
         ''' Confirm that there is one booking '''
         rv = self.app.get('/places/1/books')
         self.assertEqual(rv.status_code, 200)
-        data = json.loads(rv.data)['result']
+        data = json.loads(rv.data)['data']
         self.assertEqual(len(data), 1)
 
         ''' Delete the existing booking '''
@@ -202,7 +202,7 @@ class AppTestCase(unittest.TestCase):
         ''' Confirm that no bookings exist '''
         rv = self.app.get('/places/1/books')
         self.assertEqual(rv.status_code, 200)
-        data = json.loads(rv.data)['result']
+        data = json.loads(rv.data)['data']
         self.assertEqual(len(data), 0)
 
     def test_update(self):
