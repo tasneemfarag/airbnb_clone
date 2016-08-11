@@ -4,10 +4,11 @@ from app.models.place import Place
 from app.models.city import City
 from app.models.state import State
 from app.models.user import User
+from app.models.place_book import PlaceBook
 
 ''' Import packages '''
 from flask_json import as_json, request
-from datetime import datetime
+from datetime import datetime, timedelta
 from flask import abort
 import json
 
@@ -348,6 +349,91 @@ def create_place_by_city(state_id, city_id):
         res = {}
         res['code'] = 400
         res['msg'] = e.message
+        return res, 400
+    except Exception as e:
+        print e.message
+        abort(500)
+
+@app.route('/states/<state_id>/places', methods=['GET'])
+@as_json
+def get_places_by_state(state_id):
+    ''' Gets all places in a state '''
+    try:
+        ''' Check if state exists '''
+        query = State.select().where(State.id == state_id)
+        if not query.exists():
+            raise LookupError('state_id')
+
+        ''' Create a list of city ids in the state '''
+        query = City.select().where(City.state == state_id)
+        if not query.exists():
+            results = []
+            return {"result": results}, 200
+        cities = []
+        for city in query:
+            cities.append(city.id)
+
+        ''' Return the places in listed cities '''
+        results = []
+        data = Place.select().where(Place.city << cities)
+        for row in data:
+            results.append(row.to_hash())
+        return {"result": results}, 200
+    except LookupError as e:
+        abort(404)
+    except Exception as e:
+        print e.message
+        abort(500)
+
+@app.route('/places/<place_id>/available', methods=['POST'])
+@as_json
+def get_place_availability(place_id):
+    ''' Return availability of given place '''
+    try:
+        data = json.loads(request.data)
+        ''' Check for required keys '''
+        if not 'year' in data:
+            raise KeyError('year')
+        if not 'month' in data:
+            raise KeyError('month')
+        if not 'day' in data:
+            raise KeyError('day')
+
+        ''' Check for valid data types '''
+        if not isinstance(data['year'], int):
+            raise TypeError('year')
+        if not isinstance(data['month'], int):
+            raise TypeError('month')
+        if not isinstance(data['day'], int):
+            raise TypeError('day')
+
+        ''' Check if place exists '''
+        query = Place.select().where(Place.id == place_id)
+        if not query.exists():
+            raise LookupError('place_id')
+
+        ''' Set datetime object to compare '''
+        check_date = datetime(data['year'], data['month'], data['day'])
+
+        ''' Check if date is already booked '''
+        bookings = PlaceBook.select().where(PlaceBook.place == place_id)
+        for booking in bookings:
+            date_start = booking.date_start.replace(hour=0, minute=0, second=0)
+            date_end = date_start + timedelta(days= booking.number_nights)
+            if check_date >= date_start and check_date < date_end:
+                return {'available': False}, 200
+        return {'available': True}, 200
+    except KeyError as e:
+        res = {}
+        res['code'] = 40000
+        res['msg'] = 'Missing parameters'
+        return res, 400
+    except LookupError as e:
+        abort(404)
+    except TypeError as e:
+        res = {}
+        res['code'] = 400
+        res['msg'] = str(e.message) + 'is not an integer'
         return res, 400
     except Exception as e:
         print e.message

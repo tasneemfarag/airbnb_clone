@@ -5,14 +5,17 @@ from app.models.place import Place
 from app.models.user import User
 from app.models.state import State
 from app.models.city import City
+from app.models.place_book import PlaceBook
 
 ''' Import test data '''
 from place_data import *
 from user_data import *
 from state_data import *
 from city_data import *
+from place_book import good_place_book_1
 
 ''' Import packages '''
+from datetime import datetime, timedelta
 import unittest
 import json
 import logging
@@ -22,12 +25,12 @@ class AppTestCase(unittest.TestCase):
 
     def setUp(self):
         db.connect()
-        db.create_tables([Place, User, State, City])
+        db.create_tables([Place, User, State, City, PlaceBook])
         logging.disable(logging.CRITICAL)
         self.app = app.test_client()
 
     def tearDown(self):
-        db.drop_tables([Place, User, State, City])
+        db.drop_tables([Place, User, State, City, PlaceBook])
         db.close()
 
     def test_create(self):
@@ -375,6 +378,96 @@ class AppTestCase(unittest.TestCase):
         ''' Test if city_id is not linked to state_id '''
         rv = self.app.get('/states/2/cities/1/places')
         self.assertEqual(rv.status_code, 404)
+
+    def test_list_by_state(self):
+        ''' Set base data '''
+        rv = self.app.post('/states', headers={'Content-Type': 'application/json'}, data=json.dumps(good_state_1))
+        self.assertEqual(rv.status_code, 201)
+        rv = self.app.post('/states', headers={'Content-Type': 'application/json'}, data=json.dumps(good_state_2))
+        self.assertEqual(rv.status_code, 201)
+        rv = self.app.post('/states/1/cities', headers={'Content-Type': 'application/json'}, data=json.dumps(good_city_1))
+        self.assertEqual(rv.status_code, 201)
+        rv = self.app.post('/users', headers={'Content-Type': 'application/json'}, data=json.dumps(good_user_1))
+        self.assertEqual(rv.status_code, 201)
+
+        ''' Test if state does not exist '''
+        rv = self.app.get('/states/404/places')
+        self.assertEqual(rv.status_code, 404)
+
+        ''' Test if state has no cities '''
+        rv = self.app.get('/states/2/places')
+        self.assertEqual(rv.status_code, 200)
+        data = json.loads(rv.data)['result']
+        self.assertEqual(len(data), 0)
+
+        ''' Test if state has no places '''
+        rv = self.app.get('/states/1/places')
+        self.assertEqual(rv.status_code, 200)
+        data = json.loads(rv.data)['result']
+        self.assertEqual(len(data), 0)
+
+        ''' Create new place in city '''
+        rv = self.app.post('/states/1/cities/1/places', headers={'Content-Type': 'application/json'}, data=json.dumps(good_place_1))
+        self.assertEqual(rv.status_code, 201)
+
+        ''' Test that new place is returned by state '''
+        rv = self.app.get('/states/1/places')
+        self.assertEqual(rv.status_code, 200)
+        data = json.loads(rv.data)['result']
+        self.assertEqual(len(data), 1)
+
+    def test_place_availability(self):
+        ''' Set base data '''
+        rv = self.app.post('/users', headers={'Content-Type': 'application/json'}, data=json.dumps(good_user_1))
+        self.assertEqual(rv.status_code, 201)
+        rv = self.app.post('/users', headers={'Content-Type': 'application/json'}, data=json.dumps(good_user_2))
+        self.assertEqual(rv.status_code, 201)
+        rv = self.app.post('/states', headers={'Content-Type': 'application/json'}, data=json.dumps(good_state_1))
+        self.assertEqual(rv.status_code, 201)
+        rv = self.app.post('/states/1/cities', headers={'Content-Type': 'application/json'}, data=json.dumps(good_city_1))
+        self.assertEqual(rv.status_code, 201)
+        rv = self.app.post('/places', headers={'Content-Type': 'application/json'}, data=json.dumps(good_place_1))
+        self.assertEqual(rv.status_code, 201)
+        rv = self.app.post('/places/1/books', headers={'Content-Type': 'application/json'}, data=json.dumps(good_place_book_1))
+        self.assertEqual(rv.status_code, 201)
+
+        ''' Set booking test dates '''
+        now = datetime.now()
+        future = datetime.now() + timedelta(days=20)
+
+        ''' Test missing required values '''
+        rv = self.app.post('/places/1/available', headers={'Content-Type': 'application/json'}, data=json.dumps({'month': now.month, 'day': now.day}))
+        self.assertEqual(rv.status_code, 400)
+        rv = self.app.post('/places/1/available', headers={'Content-Type': 'application/json'}, data=json.dumps({'year': now.year, 'day': now.day}))
+        self.assertEqual(rv.status_code, 400)
+        rv = self.app.post('/places/1/available', headers={'Content-Type': 'application/json'}, data=json.dumps({'year': now.year, 'month': now.month}))
+        self.assertEqual(rv.status_code, 400)
+
+        ''' Test invalid value types '''
+        rv = self.app.post('/places/1/available', headers={'Content-Type': 'application/json'}, data=json.dumps({'year': 'nope', 'month': now.month, 'day': now.day}))
+        self.assertEqual(rv.status_code, 400)
+        rv = self.app.post('/places/1/available', headers={'Content-Type': 'application/json'}, data=json.dumps({'year': now.year, 'month': 'nope', 'day': now.day}))
+        self.assertEqual(rv.status_code, 400)
+        rv = self.app.post('/places/1/available', headers={'Content-Type': 'application/json'}, data=json.dumps({'year': now.year, 'month': now.month, 'day': 'nope'}))
+        self.assertEqual(rv.status_code, 400)
+
+        ''' Test if place does not exist '''
+        rv = self.app.post('/places/404/available', headers={'Content-Type': 'application/json'}, data=json.dumps({'year': now.year, 'month': now.month, 'day': now.day}))
+        self.assertEqual(rv.status_code, 404)
+
+        ''' Test booked date '''
+        rv = self.app.post('/places/1/available', headers={'Content-Type': 'application/json'}, data=json.dumps({'year': now.year, 'month': now.month, 'day': now.day}))
+        self.assertEqual(rv.status_code, 200)
+        data = json.loads(rv.data)
+        self.assertEqual(data['available'], False)
+
+        ''' Test if date is not in a booked range '''
+        rv = self.app.post('/places/1/available', headers={'Content-Type': 'application/json'}, data=json.dumps({'year': future.year, 'month': future.month, 'day': future.day}))
+        self.assertEqual(rv.status_code, 200)
+        data = json.loads(rv.data)
+        self.assertEqual(data['available'], True)
+
+
 
 if __name__ == '__main__':
     unittest.main()
