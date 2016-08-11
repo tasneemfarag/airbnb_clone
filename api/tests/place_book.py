@@ -93,6 +93,18 @@ class AppTestCase(unittest.TestCase):
         rv = self.app.post('/places/1/books', headers={'Content-Type': 'application/json'}, data=json.dumps(bad_place_book_8))
         self.assertEqual(rv.status_code, 400)
 
+        ''' Test if already booked and starts during booking'''
+        rv = self.app.post('/places/1/books', headers={'Content-Type': 'application/json'}, data=json.dumps(bad_place_book_9))
+        self.assertEqual(rv.status_code, 410)
+
+        ''' Test if already booked and ends during booking '''
+        rv = self.app.post('/places/1/books', headers={'Content-Type': 'application/json'}, data=json.dumps(bad_place_book_10))
+        self.assertEqual(rv.status_code, 410)
+
+        ''' Test if already booked and surrounds booking '''
+        rv = self.app.post('/places/1/books', headers={'Content-Type': 'application/json'}, data=json.dumps(bad_place_book_11))
+        self.assertEqual(rv.status_code, 410)
+
     def test_list(self):
         ''' Set base data '''
         rv = self.app.post('/users', headers={'Content-Type': 'application/json'}, data=json.dumps(good_user_1))

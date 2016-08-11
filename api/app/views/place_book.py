@@ -7,7 +7,7 @@ from app.models.user import User
 ''' Import packages '''
 from flask_json import as_json, request
 from flask import abort
-from datetime import datetime
+from datetime import datetime, timedelta
 import json
 
 @app.route('/places/<place_id>/books', methods=['GET'])
@@ -75,6 +75,20 @@ def book_date(place_id):
             if not isinstance(data['number_nights'], int):
                 raise TypeError('number_nights is not an integer')
 
+        ''' Check if place is already booked '''
+        book_start = datetime.strptime(data['date_start'], "%Y/%m/%d %H:%M:%S").replace(hour=0, minute=0, second=0)
+        book_end = book_start + timedelta(days= data['number_nights'])
+        bookings = PlaceBook.select().where(PlaceBook.place == place_id)
+        for booking in bookings:
+            date_start = booking.date_start.replace(hour=0, minute=0, second=0)
+            date_end = date_start + timedelta(days= booking.number_nights)
+            if book_start >= date_start and book_start < date_end:
+                raise ValueError('booked')
+            elif book_end > date_start and book_end <= date_end:
+                raise ValueError('booked')
+            elif date_start >= book_start and date_start < book_end:
+                raise ValueError('booked')
+
         ''' Create new booking '''
         new = PlaceBook(
             place = place_id,
@@ -99,6 +113,11 @@ def book_date(place_id):
     except LookupError as e:
         abort(404)
     except ValueError as e:
+        if e.message == 'booked':
+            res = {}
+            res['code'] = 110000
+            res['msg'] = 'Place unavailable at this date'
+            return res, 410
         res = {}
         res['code'] = 400
         res['msg'] = e.message
@@ -108,7 +127,8 @@ def book_date(place_id):
         res['code'] = 400
         res['msg'] = e.message
         return res, 400
-    except Exception as error:
+    except Exception as e:
+        print e.message
         abort(500)
 
 @app.route('/places/<place_id>/books/<book_id>', methods=['GET'])
