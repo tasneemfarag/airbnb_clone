@@ -64,13 +64,13 @@ class AppTestCase(unittest.TestCase):
 		rv = self.app.post('/users/1/reviews', headers={'Content-Type': 'application/json'}, data=json.dumps(bad_review_1))
 		self.assertEqual(rv.status_code, 400)
 		data = json.loads(rv.data)
-		self.assertEqual(str(data['msg']), "message is missing")
+		self.assertEqual(str(data['msg']), "Missing parameters")
 
 		''' Test missing user_id '''
 		rv = self.app.post('/users/1/reviews', headers={'Content-Type': 'application/json'}, data=json.dumps(bad_review_2))
 		self.assertEqual(rv.status_code, 400)
 		data = json.loads(rv.data)
-		self.assertEqual(str(data['msg']), "user_id is missing")
+		self.assertEqual(str(data['msg']), "Missing parameters")
 
 		''' Test bad data types for message '''
 		rv = self.app.post('/users/1/reviews', headers={'Content-Type': 'application/json'}, data=json.dumps(bad_review_3))
