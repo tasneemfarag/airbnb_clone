@@ -2,7 +2,6 @@ from fabric.api import *
 from fabric.contrib import *
 
 ''' Deploys codebase via github.com/rickharris-dev/microblog-project.git'''
-
 env.shell = '/bin/bash -c'
 
 def pack(remote="origin", branch="master"):
@@ -15,21 +14,27 @@ def pack(remote="origin", branch="master"):
         local("git pull " + remote + " " + branch)
         local("git push " + remote + " " + branch)
 
-def setup_rick(repo="https://github.com/rickharris-dev/airbnb_clone.git"):
+def setup_rick(task="", repo="https://github.com/rickharris-dev/airbnb_clone.git"):
     env.hosts = ['admin@158.69.91.92', 'ubuntu@52.91.120.197']
-    execute('setup')
+    if task == 'setup':
+        execute('setup')
+    elif task == 'deploy':
+        execute('deploy')
+    elif task == 'run':
+        execute('run_wsgi')
+    else:
+        pass
 
-def setup_tasneem(repo="https://github.com/rickharris-dev/airbnb_clone.git"):
+def setup_tasneem(task="", repo="https://github.com/rickharris-dev/airbnb_clone.git"):
     env.hosts = ['admin@158.69.85.206', 'ubuntu@54.173.6.112']
-    execute('setup')
-
-def deploy_rick(repo="https://github.com/rickharris-dev/airbnb_clone.git"):
-    env.hosts = ['admin@158.69.91.92', 'ubuntu@52.91.120.197']
-    execute('deploy')
-
-def deploy_tasneem(repo="https://github.com/rickharris-dev/airbnb_clone.git"):
-    env.hosts = ['admin@158.69.85.206', 'ubuntu@54.173.6.112']
-    execute('deploy')
+    if task == 'setup':
+        execute('setup')
+    elif task == 'deploy':
+        execute('deploy')
+    elif task == 'run':
+        execute('run_wsgi')
+    else:
+        pass
 
 def setup(repo="https://github.com/rickharris-dev/airbnb_clone.git"):
     ''' Check if git is installed on the server '''
