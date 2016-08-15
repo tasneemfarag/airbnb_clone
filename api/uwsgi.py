@@ -1,6 +1,12 @@
-#!/usr/bin/python
+from flask import Flask
+from flask_json import FlaskJSON
 
-from subprocess import call
-from config import *
+'''initialized Flask application'''
+app = Flask(__name__)
+app.config['JSON_ADD_STATUS'] = False
 
-call(["uwsgi", "--socket", "127.0.0.1:" + str(PORT), "--wsgi-file", "app.py", "--callable", "app", "--processes", "4", "--threads", "2", "--stats", "127.0.0.1:9191"])
+'''initialized FlaskJSON with app'''
+json = FlaskJSON(app)
+
+'''Imports all views'''
+from app.views import *
