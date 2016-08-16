@@ -15,12 +15,15 @@ def index():
     return data
 
 '''to open databse connection using db'''
-def before_request():
-    db.database.connect()
+@app.before_request
+def _db_connect():
+    db.connect()
 
 '''to close databse connection using db'''
-def after_request():
-    db.database.close()
+@app.teardown_request
+def _db_close(exc):
+    if not db.is_closed():
+        db.close()
 
 @app.errorhandler(404)
 @as_json
