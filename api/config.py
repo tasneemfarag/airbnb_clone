@@ -9,7 +9,7 @@ DATABASE['charset'] = 'utf8'
 if environ.get('AIRBNB_ENV') == 'production':
     ''' Production specific variables '''
     DEBUG = False
-    HOST = '0.0.0.0'
+    HOST = 'anakin.rickharris.tech'
     PORT = 3000
     DATABASE['user'] = 'airbnb_user_prod'
     DATABASE['database'] = 'airbnb_prod'
