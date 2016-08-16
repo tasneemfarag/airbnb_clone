@@ -2,6 +2,7 @@
 from app import app
 from app.models.state import State
 from return_styles import ListStyle
+from index import type_test
 
 ''' Import packages '''
 from flask_json import as_json, request
@@ -23,7 +24,10 @@ def get_states():
 @as_json
 def create_state():
     ''' Adds a new state '''
-    data = json.loads(request.data)
+    data = {}
+    for key in request.form.keys():
+    	for value in request.form.getlist(key):
+    		data[key] = value
     try:
         ''' Check that name key is in data '''
         if not 'name' in data:
@@ -34,7 +38,7 @@ def create_state():
             raise TypeError("'name' cannot be NULL")
 
         ''' Check that name key value is a string '''
-        if not isinstance(data['name'], unicode):
+        if not type_test(data['name'], 'string'):
             raise TypeError("'name' must be a string")
 
         ''' Check if state already exists '''

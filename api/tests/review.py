@@ -37,66 +37,66 @@ class AppTestCase(unittest.TestCase):
 
 	def test_create_user_review(self):
 		''' Set base data '''
-		rv = self.app.post('/users', headers={'Content-Type': 'application/json'}, data=json.dumps(good_user_1))
+		rv = self.app.post('/users', data=good_user_1)
 		self.assertEqual(rv.status_code, 201)
 		data = json.loads(rv.data)
 		self.assertEqual(data['id'], 1)
-		rv = self.app.post('/users', headers={'Content-Type': 'application/json'}, data=json.dumps(good_user_2))
+		rv = self.app.post('/users', data=good_user_2)
 		self.assertEqual(rv.status_code, 201)
 		data = json.loads(rv.data)
 		self.assertEqual(data['id'], 2)
 
 		''' Test good reviews '''
-		rv = self.app.post('/users/2/reviews', headers={'Content-Type': 'application/json'}, data=json.dumps(good_review_1))
+		rv = self.app.post('/users/2/reviews', data=good_review_1)
 		self.assertEqual(rv.status_code, 201)
 		data = json.loads(rv.data)
 		self.assertEqual(data['id'], 1)
-		rv = self.app.post('/users/1/reviews', headers={'Content-Type': 'application/json'}, data=json.dumps(good_review_2))
+		rv = self.app.post('/users/1/reviews', data=good_review_2)
 		self.assertEqual(rv.status_code, 201)
 		data = json.loads(rv.data)
 		self.assertEqual(data['id'], 2)
 
 		''' Test review for non-existent user '''
-		rv = self.app.post('/users/404/reviews', headers={'Content-Type': 'application/json'}, data=json.dumps(good_review_1))
+		rv = self.app.post('/users/404/reviews', data=good_review_1)
 		self.assertEqual(rv.status_code, 404)
 
 		''' Test missing message '''
-		rv = self.app.post('/users/1/reviews', headers={'Content-Type': 'application/json'}, data=json.dumps(bad_review_1))
+		rv = self.app.post('/users/1/reviews', data=bad_review_1)
 		self.assertEqual(rv.status_code, 400)
 		data = json.loads(rv.data)
 		self.assertEqual(str(data['msg']), "Missing parameters")
 
 		''' Test missing user_id '''
-		rv = self.app.post('/users/1/reviews', headers={'Content-Type': 'application/json'}, data=json.dumps(bad_review_2))
+		rv = self.app.post('/users/1/reviews', data=bad_review_2)
 		self.assertEqual(rv.status_code, 400)
 		data = json.loads(rv.data)
 		self.assertEqual(str(data['msg']), "Missing parameters")
 
 		''' Test bad data types for message '''
-		rv = self.app.post('/users/1/reviews', headers={'Content-Type': 'application/json'}, data=json.dumps(bad_review_3))
+		rv = self.app.post('/users/1/reviews', data=bad_review_3)
 		self.assertEqual(rv.status_code, 400)
 		data = json.loads(rv.data)
 		self.assertEqual(str(data['msg']), "message is invalid")
 
 		''' Test bad data types for user_id '''
-		rv = self.app.post('/users/1/reviews', headers={'Content-Type': 'application/json'}, data=json.dumps(bad_review_4))
+		rv = self.app.post('/users/1/reviews', data=bad_review_4)
 		self.assertEqual(rv.status_code, 400)
 		data = json.loads(rv.data)
 		self.assertEqual(str(data['msg']), "user_id is invalid")
 
 		''' Test bad data types for stars '''
-		rv = self.app.post('/users/1/reviews', headers={'Content-Type': 'application/json'}, data=json.dumps(bad_review_5))
+		rv = self.app.post('/users/1/reviews', data=bad_review_5)
 		self.assertEqual(rv.status_code, 400)
 		data = json.loads(rv.data)
 		self.assertEqual(str(data['msg']), "stars is invalid")
 
 	def test_get_user_reviews(self):
 		''' Set base data '''
-		rv = self.app.post('/users', headers={'Content-Type': 'application/json'}, data=json.dumps(good_user_1))
+		rv = self.app.post('/users', data=good_user_1)
 		self.assertEqual(rv.status_code, 201)
 		data = json.loads(rv.data)
 		self.assertEqual(data['id'], 1)
-		rv = self.app.post('/users', headers={'Content-Type': 'application/json'}, data=json.dumps(good_user_2))
+		rv = self.app.post('/users', data=good_user_2)
 		self.assertEqual(rv.status_code, 201)
 		data = json.loads(rv.data)
 		self.assertEqual(data['id'], 2)
@@ -111,7 +111,7 @@ class AppTestCase(unittest.TestCase):
 		self.assertEqual(len(data), 0)
 
 		''' Test if 1 user review '''
-		rv = self.app.post('/users/1/reviews', headers={'Content-Type': 'application/json'}, data=json.dumps(good_review_1))
+		rv = self.app.post('/users/1/reviews', data=good_review_1)
 		self.assertEqual(rv.status_code, 201)
 		data = json.loads(rv.data)
 		self.assertEqual(data['id'], 1)
@@ -121,12 +121,12 @@ class AppTestCase(unittest.TestCase):
 
 	def test_get_user_review(self):
 		''' Set base data '''
-		rv = self.app.post('/users', headers={'Content-Type': 'application/json'}, data=json.dumps(good_user_1))
+		rv = self.app.post('/users', data=good_user_1)
 		self.assertEqual(rv.status_code, 201)
 		rv = self.app.get('/users/1/reviews')
 		data = json.loads(rv.data)['data']
 		self.assertEqual(len(data), 0)
-		rv = self.app.post('/users/1/reviews', headers={'Content-Type': 'application/json'}, data=json.dumps(good_review_1))
+		rv = self.app.post('/users/1/reviews', data=good_review_1)
 		self.assertEqual(rv.status_code, 201)
 		data = json.loads(rv.data)
 		self.assertEqual(data['id'], 1)
@@ -148,12 +148,12 @@ class AppTestCase(unittest.TestCase):
 
 	def test_delete_user_review(self):
 		''' Set base data '''
-		rv = self.app.post('/users', headers={'Content-Type': 'application/json'}, data=json.dumps(good_user_1))
+		rv = self.app.post('/users', data=good_user_1)
 		self.assertEqual(rv.status_code, 201)
 		rv = self.app.get('/users/1/reviews')
 		data = json.loads(rv.data)['data']
 		self.assertEqual(len(data), 0)
-		rv = self.app.post('/users/1/reviews', headers={'Content-Type': 'application/json'}, data=json.dumps(good_review_1))
+		rv = self.app.post('/users/1/reviews', data=good_review_1)
 		self.assertEqual(rv.status_code, 201)
 		data = json.loads(rv.data)
 		self.assertEqual(data['id'], 1)
@@ -176,71 +176,71 @@ class AppTestCase(unittest.TestCase):
 
 	def test_post_place_review(self):
 		''' Set base data '''
-		rv = self.app.post('/users', headers={'Content-Type': 'application/json'}, data=json.dumps(good_user_1))
+		rv = self.app.post('/users', data=good_user_1)
 		self.assertEqual(rv.status_code, 201)
 		data = json.loads(rv.data)
 		self.assertEqual(data['id'], 1)
-		rv = self.app.post('/users', headers={'Content-Type': 'application/json'}, data=json.dumps(good_user_2))
+		rv = self.app.post('/users', data=good_user_2)
 		self.assertEqual(rv.status_code, 201)
 		data = json.loads(rv.data)
 		self.assertEqual(data['id'], 2)
-		rv = self.app.post('/states', headers={'Content-Type': 'application/json'}, data=json.dumps(good_state_1))
+		rv = self.app.post('/states', data=good_state_1)
 		self.assertEqual(rv.status_code, 201)
-		rv = self.app.post('/states/1/cities', headers={'Content-Type': 'application/json'}, data=json.dumps(good_city_1))
+		rv = self.app.post('/states/1/cities', data=good_city_1)
 		self.assertEqual(rv.status_code, 201)
-		rv = self.app.post('/places', headers={'Content-Type': 'application/json'}, data=json.dumps(good_place_1))
+		rv = self.app.post('/places', data=good_place_1)
 		self.assertEqual(rv.status_code, 201)
 
 
 		''' Test good reviews '''
-		rv = self.app.post('/places/1/reviews', headers={'Content-Type': 'application/json'}, data=json.dumps(good_place_review_1))
+		rv = self.app.post('/places/1/reviews', data=good_place_review_1)
 		self.assertEqual(rv.status_code, 201)
 		data = json.loads(rv.data)
 		self.assertEqual(data['id'], 1)
-		rv = self.app.post('/places/1/reviews', headers={'Content-Type': 'application/json'}, data=json.dumps(good_place_review_2))
+		rv = self.app.post('/places/1/reviews', data=good_place_review_2)
 		self.assertEqual(rv.status_code, 201)
 		data = json.loads(rv.data)
 		self.assertEqual(data['id'], 2)
 
 		''' Test review for non-existent place '''
-		rv = self.app.post('/places/404/reviews', headers={'Content-Type': 'application/json'}, data=json.dumps(good_place_review_1))
+		rv = self.app.post('/places/404/reviews', data=good_place_review_1)
 		self.assertEqual(rv.status_code, 404)
 
 		''' Test missing message '''
-		rv = self.app.post('/places/1/reviews', headers={'Content-Type': 'application/json'}, data=json.dumps(bad_place_review_1))
+		rv = self.app.post('/places/1/reviews', data=bad_place_review_1)
 		self.assertEqual(rv.status_code, 400)
 
 		''' Test missing user_id '''
-		rv = self.app.post('/places/1/reviews', headers={'Content-Type': 'application/json'}, data=json.dumps(bad_place_review_2))
+		rv = self.app.post('/places/1/reviews', data=bad_place_review_2)
 		self.assertEqual(rv.status_code, 400)
 
 		''' Test bad data types for message '''
-		rv = self.app.post('/places/1/reviews', headers={'Content-Type': 'application/json'}, data=json.dumps(bad_place_review_3))
+		rv = self.app.post('/places/1/reviews', data=bad_place_review_3)
 		self.assertEqual(rv.status_code, 400)
 
-		''' Test bad data types for place_id '''
-		rv = self.app.post('/places/1/reviews', headers={'Content-Type': 'application/json'}, data=json.dumps(bad_place_review_4))
+		''' Test bad data types for user_id '''
+		rv = self.app.post('/places/1/reviews', data=bad_place_review_4)
 		self.assertEqual(rv.status_code, 400)
 
 		''' Test bad data types for stars '''
-		rv = self.app.post('/places/1/reviews', headers={'Content-Type': 'application/json'}, data=json.dumps(bad_place_review_5))
+		rv = self.app.post('/places/1/reviews', data=bad_place_review_5)
 		self.assertEqual(rv.status_code, 400)
 
 	def test_get_place_reviews(self):
 		''' Set base data '''
-		rv = self.app.post('/users', headers={'Content-Type': 'application/json'}, data=json.dumps(good_user_1))
+		rv = self.app.post('/users', data=good_user_1)
 		self.assertEqual(rv.status_code, 201)
 		data = json.loads(rv.data)
 		self.assertEqual(data['id'], 1)
-		rv = self.app.post('/users', headers={'Content-Type': 'application/json'}, data=json.dumps(good_user_2))
+		rv = self.app.post('/users', data=good_user_2)
 		self.assertEqual(rv.status_code, 201)
 		data = json.loads(rv.data)
 		self.assertEqual(data['id'], 2)
-		rv = self.app.post('/states', headers={'Content-Type': 'application/json'}, data=json.dumps(good_state_1))
+		rv = self.app.post('/states', data=good_state_1)
 		self.assertEqual(rv.status_code, 201)
-		rv = self.app.post('/states/1/cities', headers={'Content-Type': 'application/json'}, data=json.dumps(good_city_1))
+		rv = self.app.post('/states/1/cities', data=good_city_1)
 		self.assertEqual(rv.status_code, 201)
-		rv = self.app.post('/places', headers={'Content-Type': 'application/json'}, data=json.dumps(good_place_1))
+		rv = self.app.post('/places', data=good_place_1)
 		self.assertEqual(rv.status_code, 201)
 
 		''' Test if place does not exist '''
@@ -253,7 +253,7 @@ class AppTestCase(unittest.TestCase):
 		self.assertEqual(len(data), 0)
 
 		''' Test if 1 place review '''
-		rv = self.app.post('/places/1/reviews', headers={'Content-Type': 'application/json'}, data=json.dumps(good_place_review_1))
+		rv = self.app.post('/places/1/reviews', data=good_place_review_1)
 		self.assertEqual(rv.status_code, 201)
 		data = json.loads(rv.data)
 		self.assertEqual(data['id'], 1)
@@ -263,21 +263,21 @@ class AppTestCase(unittest.TestCase):
 
 	def test_get_place_review(self):
 		''' Set base data '''
-		rv = self.app.post('/users', headers={'Content-Type': 'application/json'}, data=json.dumps(good_user_1))
+		rv = self.app.post('/users', data=good_user_1)
 		self.assertEqual(rv.status_code, 201)
 		data = json.loads(rv.data)
 		self.assertEqual(data['id'], 1)
-		rv = self.app.post('/users', headers={'Content-Type': 'application/json'}, data=json.dumps(good_user_2))
+		rv = self.app.post('/users', data=good_user_2)
 		self.assertEqual(rv.status_code, 201)
 		data = json.loads(rv.data)
 		self.assertEqual(data['id'], 2)
-		rv = self.app.post('/states', headers={'Content-Type': 'application/json'}, data=json.dumps(good_state_1))
+		rv = self.app.post('/states', data=good_state_1)
 		self.assertEqual(rv.status_code, 201)
-		rv = self.app.post('/states/1/cities', headers={'Content-Type': 'application/json'}, data=json.dumps(good_city_1))
+		rv = self.app.post('/states/1/cities', data=good_city_1)
 		self.assertEqual(rv.status_code, 201)
-		rv = self.app.post('/places', headers={'Content-Type': 'application/json'}, data=json.dumps(good_place_1))
+		rv = self.app.post('/places', data=good_place_1)
 		self.assertEqual(rv.status_code, 201)
-		rv = self.app.post('/places/1/reviews', headers={'Content-Type': 'application/json'}, data=json.dumps(good_place_review_1))
+		rv = self.app.post('/places/1/reviews', data=good_place_review_1)
 		self.assertEqual(rv.status_code, 201)
 
 		''' Test if place does not exist '''
@@ -297,21 +297,21 @@ class AppTestCase(unittest.TestCase):
 
 	def test_delete_place_review(self):
 		''' Set base data '''
-		rv = self.app.post('/users', headers={'Content-Type': 'application/json'}, data=json.dumps(good_user_1))
+		rv = self.app.post('/users', data=good_user_1)
 		self.assertEqual(rv.status_code, 201)
 		data = json.loads(rv.data)
 		self.assertEqual(data['id'], 1)
-		rv = self.app.post('/users', headers={'Content-Type': 'application/json'}, data=json.dumps(good_user_2))
+		rv = self.app.post('/users', data=good_user_2)
 		self.assertEqual(rv.status_code, 201)
 		data = json.loads(rv.data)
 		self.assertEqual(data['id'], 2)
-		rv = self.app.post('/states', headers={'Content-Type': 'application/json'}, data=json.dumps(good_state_1))
+		rv = self.app.post('/states', data=good_state_1)
 		self.assertEqual(rv.status_code, 201)
-		rv = self.app.post('/states/1/cities', headers={'Content-Type': 'application/json'}, data=json.dumps(good_city_1))
+		rv = self.app.post('/states/1/cities', data=good_city_1)
 		self.assertEqual(rv.status_code, 201)
-		rv = self.app.post('/places', headers={'Content-Type': 'application/json'}, data=json.dumps(good_place_1))
+		rv = self.app.post('/places', data=good_place_1)
 		self.assertEqual(rv.status_code, 201)
-		rv = self.app.post('/places/1/reviews', headers={'Content-Type': 'application/json'}, data=json.dumps(good_place_review_1))
+		rv = self.app.post('/places/1/reviews', data=good_place_review_1)
 		self.assertEqual(rv.status_code, 201)
 
 		''' Test if place does not exist '''

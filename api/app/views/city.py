@@ -3,6 +3,7 @@ from app import app
 from app.models.city import City
 from app.models.city import State
 from return_styles import ListStyle
+from index import type_test
 
 ''' Import packages '''
 from flask_json import as_json, request
@@ -32,7 +33,10 @@ def get_cities(state_id):
 @as_json
 def create_city(state_id):
     ''' Creates a new city in a given state '''
-    data = json.loads(request.data)
+    data = {}
+    for key in request.form.keys():
+    	for value in request.form.getlist(key):
+    		data[key] = value
     try:
         ''' Check if state exists '''
         query = State.select().where(State.id == state_id)
@@ -44,7 +48,7 @@ def create_city(state_id):
             raise KeyError('name')
 
         ''' Check if 'name' value is a string '''
-        if not isinstance(data['name'], unicode):
+        if not type_test(data['name'], 'string'):
             raise TypeError("'name' value is not a string")
 
         ''' Check if city already exists '''

@@ -6,6 +6,7 @@ from app.models.review import Review
 from app.models.user import User
 from app.models.place import Place
 from return_styles import ListStyle
+from index import type_test
 
 ''' Import packages '''
 from flask_json import as_json, request
@@ -39,7 +40,10 @@ def get_user_reviews(user_id):
 @app.route('/users/<user_id>/reviews', methods=['POST'])
 @as_json
 def create_user_reviews(user_id):
-	data = request.json
+	data = {}
+	for key in request.form.keys():
+		for value in request.form.getlist(key):
+			data[key] = value
 	try:
 		'''
 		Data should include a user_id value that will be used to associate
@@ -54,11 +58,11 @@ def create_user_reviews(user_id):
 			raise KeyError('message')
 
 		''' Test type of submitted data '''
-		if not isinstance(data['user_id'], int):
+		if not type_test(data['user_id'], int):
 			raise ValueError('user_id')
-		elif not isinstance(data['message'], unicode):
+		elif not type_test(data['message'], 'string'):
 			raise ValueError('message')
-		elif 'stars' in data and not isinstance(data['stars'], int):
+		elif 'stars' in data and not type_test(data['stars'], int):
 			raise ValueError('stars')
 
 		''' Test if route user_id exists '''
@@ -169,7 +173,10 @@ def get_place_reviews(place_id):
 @app.route('/places/<place_id>/reviews', methods=['POST'])
 @as_json
 def create_place_review(place_id):
-	data = request.json
+	data = {}
+	for key in request.form.keys():
+		for value in request.form.getlist(key):
+			data[key] = value
 	try:
 		''' Test for required data '''
 		if not data['user_id']:
@@ -178,11 +185,11 @@ def create_place_review(place_id):
 			raise KeyError('message')
 
 		''' Test type of submitted data '''
-		if not isinstance(data['user_id'], int):
+		if not type_test(data['user_id'], int):
 			raise ValueError('user_id')
-		elif not isinstance(data['message'], unicode):
+		elif not type_test(data['message'], 'string'):
 			raise ValueError('message')
-		elif 'stars' in data and not isinstance(data['stars'], int):
+		elif 'stars' in data and not type_test(data['stars'], int):
 			raise ValueError('stars')
 
 		''' Test if route place_id exists '''

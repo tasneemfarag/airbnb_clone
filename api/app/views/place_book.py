@@ -4,6 +4,7 @@ from app.models.place_book import PlaceBook
 from app.models.place import Place
 from app.models.user import User
 from return_styles import ListStyle
+from index import type_test
 
 ''' Import packages '''
 from flask_json import as_json, request
@@ -33,7 +34,10 @@ def get_place_bookings(place_id):
 @as_json
 def book_date(place_id):
     ''' Creates a new booking for a place '''
-    data = json.loads(request.data)
+    data = {}
+    for key in request.form.keys():
+    	for value in request.form.getlist(key):
+    		data[key] = value
     try:
         ''' Check if place_id exists '''
         query = Place.select().where(Place.id == place_id)
@@ -47,7 +51,7 @@ def book_date(place_id):
             raise KeyError('date_start')
 
         ''' Check if user_id is an integer '''
-        if not isinstance(data['user_id'], int):
+        if not type_test(data['user_id'], int):
             raise TypeError('user_id is not an integer')
 
         ''' Check if user_id exists '''
@@ -56,7 +60,7 @@ def book_date(place_id):
             raise LookupError('user_id')
 
         ''' Check if date_start is a string '''
-        if not isinstance(data['date_start'], unicode):
+        if not type_test(data['date_start'], 'string'):
             raise TypeError('date_start is not a string')
 
         ''' Check if date_start string if formatted correctly '''
@@ -65,21 +69,21 @@ def book_date(place_id):
 
         ''' Check if is_validated is a boolean '''
         if 'is_validated' in data:
-            if not isinstance(data['is_validated'], bool):
+            if not type_test(data['is_validated'], bool):
                 raise TypeError('is_validated is not a boolean')
 
         ''' Check if number_nights is an integer '''
         if 'number_nights' in data:
-            if not isinstance(data['number_nights'], int):
+            if not type_test(data['number_nights'], int):
                 raise TypeError('number_nights is not an integer')
 
         ''' Check if place is already booked '''
         book_start = datetime.strptime(data['date_start'], "%Y/%m/%d %H:%M:%S").replace(hour=0, minute=0, second=0)
-        book_end = book_start + timedelta(days= data['number_nights'])
+        book_end = book_start + timedelta(days= int(data['number_nights']))
         bookings = PlaceBook.select().where(PlaceBook.place == place_id)
         for booking in bookings:
             date_start = booking.date_start.replace(hour=0, minute=0, second=0)
-            date_end = date_start + timedelta(days= booking.number_nights)
+            date_end = date_start + timedelta(days= int(booking.number_nights))
             if book_start >= date_start and book_start < date_end:
                 raise ValueError('booked')
             elif book_end > date_start and book_end <= date_end:
@@ -161,7 +165,10 @@ def get_booking(place_id, book_id):
 @as_json
 def update_booking(place_id, book_id):
     ''' Updates the given bookings information '''
-    data = json.loads(request.data)
+    data = {}
+    for key in request.form.keys():
+        for value in request.form.getlist(key):
+        	data[key] = value
     try:
         ''' Test if place does not exist '''
         query = Place.select().where(Place.id == place_id)
@@ -187,13 +194,16 @@ def update_booking(place_id, book_id):
 
         ''' Check if is_validated in data '''
         if 'is_validated' in data:
-            if not isinstance(data['is_validated'], bool):
+            if not type_test(data['is_validated'], bool):
                 raise TypeError("Value of 'is_validated' should be a boolean")
-            booking.is_validated = data['is_validated']
+            if data['is_validated'] == 'True':
+                booking.is_validated = True
+            else:
+                booking.is_validated = False
 
         ''' Check if date_start in data '''
         if 'date_start' in data:
-            if not isinstance(data['date_start'], unicode):
+            if not type_test(data['date_start'], 'string'):
                 raise TypeError("Value of 'date_start' should be a string")
             if not datetime.strptime(data['date_start'], "%Y/%m/%d %H:%M:%S"):
                 raise TypeError("'date_start' is not formatted properly")
@@ -201,7 +211,7 @@ def update_booking(place_id, book_id):
 
         ''' Check if number_nights in data '''
         if 'number_nights' in data:
-            if not isinstance(data['number_nights'], int):
+            if not type_test(data['number_nights'], int):
                 raise TypeError("Value of 'number_nights' should be a integer")
             booking.number_nights = data['number_nights']
         booking.save()

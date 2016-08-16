@@ -1,9 +1,12 @@
+# -*- coding: utf-8 -*-
+
 ''' Import app and models '''
 from app import app
 from app.models.amenity import Amenity
 from app.models.place import Place
 from app.models.place_amenity import PlaceAmenities
 from return_styles import ListStyle
+from index import type_test
 
 ''' Import packages '''
 from flask_json import as_json, request
@@ -23,14 +26,17 @@ def get_amenities():
 @as_json
 def create_amenity():
     ''' Creates a new amenity '''
-    data = request.get_json()
+    data = {}
+    for key in request.form.keys():
+    	for value in request.form.getlist(key):
+    		data[key] = value
     try:
         ''' Check if name for amenity was given '''
         if not 'name' in data:
             raise KeyError("'name'")
 
         ''' Check if name is a string '''
-        if not isinstance(data['name'], unicode):
+        if not type_test(data['name'], 'string'):
             raise TypeError("Amenity 'name' must be a string value")
 
         ''' Check if amenity already exists '''

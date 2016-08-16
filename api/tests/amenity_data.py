@@ -15,5 +15,5 @@ bad_amenity_2 = {
 }
 
 bad_amenity_3 = {
-	
+
 }

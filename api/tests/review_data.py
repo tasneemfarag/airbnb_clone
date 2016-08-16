@@ -35,7 +35,7 @@ bad_review_3 = {
 
 bad_review_4 = {
 	'message': 'User id cannot be a string',
-	'user_id': '152'
+	'user_id': 'nope'
 }
 
 bad_review_5 = {
@@ -59,7 +59,7 @@ bad_place_review_3 = {
 
 bad_place_review_4 = {
 	'message': 'User id cannot be a string',
-	'user_id': '152'
+	'user_id': 'Nope'
 }
 
 bad_place_review_5 = {

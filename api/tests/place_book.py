@@ -33,89 +33,89 @@ class AppTestCase(unittest.TestCase):
 
     def test_create(self):
         ''' Set base data '''
-        rv = self.app.post('/users', headers={'Content-Type': 'application/json'}, data=json.dumps(good_user_1))
+        rv = self.app.post('/users', data=good_user_1)
         self.assertEqual(rv.status_code, 201)
-        rv = self.app.post('/users', headers={'Content-Type': 'application/json'}, data=json.dumps(good_user_2))
+        rv = self.app.post('/users', data=good_user_2)
         self.assertEqual(rv.status_code, 201)
-        rv = self.app.post('/states', headers={'Content-Type': 'application/json'}, data=json.dumps(good_state_1))
+        rv = self.app.post('/states', data=good_state_1)
         self.assertEqual(rv.status_code, 201)
-        rv = self.app.post('/states/1/cities', headers={'Content-Type': 'application/json'}, data=json.dumps(good_city_1))
+        rv = self.app.post('/states/1/cities', data=good_city_1)
         self.assertEqual(rv.status_code, 201)
-        rv = self.app.post('/places', headers={'Content-Type': 'application/json'}, data=json.dumps(good_place_1))
+        rv = self.app.post('/places', data=good_place_1)
         self.assertEqual(rv.status_code, 201)
-        rv = self.app.post('/places', headers={'Content-Type': 'application/json'}, data=json.dumps(good_place_2))
+        rv = self.app.post('/places', data=good_place_2)
         self.assertEqual(rv.status_code, 201)
 
         ''' Test if place does not exist '''
-        rv = self.app.post('/places/404/books', headers={'Content-Type': 'application/json'}, data=json.dumps(good_place_book_1))
+        rv = self.app.post('/places/404/books', data=good_place_book_1)
         self.assertEqual(rv.status_code, 404)
 
         ''' Create new bookings '''
-        rv = self.app.post('/places/1/books', headers={'Content-Type': 'application/json'}, data=json.dumps(good_place_book_1))
+        rv = self.app.post('/places/1/books', data=good_place_book_1)
         self.assertEqual(rv.status_code, 201)
         data = json.loads(rv.data)
         self.assertEqual(data['id'], 1)
 
-        rv = self.app.post('/places/2/books', headers={'Content-Type': 'application/json'}, data=json.dumps(good_place_book_2))
+        rv = self.app.post('/places/2/books', data=good_place_book_2)
         self.assertEqual(rv.status_code, 201)
         data = json.loads(rv.data)
         self.assertEqual(data['id'], 2)
 
         ''' Test if user does not exist '''
-        rv = self.app.post('/places/1/books', headers={'Content-Type': 'application/json'}, data=json.dumps(bad_place_book_1))
+        rv = self.app.post('/places/1/books', data=bad_place_book_1)
         self.assertEqual(rv.status_code, 404)
 
         ''' Test if user_id is missing '''
-        rv = self.app.post('/places/1/books', headers={'Content-Type': 'application/json'}, data=json.dumps(bad_place_book_2))
+        rv = self.app.post('/places/1/books', data=bad_place_book_2)
         self.assertEqual(rv.status_code, 400)
 
         ''' Test if date_start is missing '''
-        rv = self.app.post('/places/1/books', headers={'Content-Type': 'application/json'}, data=json.dumps(bad_place_book_3))
+        rv = self.app.post('/places/1/books', data=bad_place_book_3)
         self.assertEqual(rv.status_code, 400)
 
         ''' Test if user_id type is invalid '''
-        rv = self.app.post('/places/1/books', headers={'Content-Type': 'application/json'}, data=json.dumps(bad_place_book_4))
+        rv = self.app.post('/places/1/books', data=bad_place_book_4)
         self.assertEqual(rv.status_code, 400)
 
         ''' Test if is_validated type is invalid '''
-        rv = self.app.post('/places/1/books', headers={'Content-Type': 'application/json'}, data=json.dumps(bad_place_book_5))
+        rv = self.app.post('/places/1/books', data=bad_place_book_5)
         self.assertEqual(rv.status_code, 400)
 
         ''' Test if date_start type is invalid '''
-        rv = self.app.post('/places/1/books', headers={'Content-Type': 'application/json'}, data=json.dumps(bad_place_book_6))
+        rv = self.app.post('/places/1/books', data=bad_place_book_6)
         self.assertEqual(rv.status_code, 400)
 
         ''' Test if date_start string formatted incorrectly '''
-        rv = self.app.post('/places/1/books', headers={'Content-Type': 'application/json'}, data=json.dumps(bad_place_book_7))
+        rv = self.app.post('/places/1/books', data=bad_place_book_7)
         self.assertEqual(rv.status_code, 400)
 
         ''' Test if number_nights type is invalid '''
-        rv = self.app.post('/places/1/books', headers={'Content-Type': 'application/json'}, data=json.dumps(bad_place_book_8))
+        rv = self.app.post('/places/1/books', data=bad_place_book_8)
         self.assertEqual(rv.status_code, 400)
 
         ''' Test if already booked and starts during booking'''
-        rv = self.app.post('/places/1/books', headers={'Content-Type': 'application/json'}, data=json.dumps(bad_place_book_9))
+        rv = self.app.post('/places/1/books', data=bad_place_book_9)
         self.assertEqual(rv.status_code, 410)
 
         ''' Test if already booked and ends during booking '''
-        rv = self.app.post('/places/1/books', headers={'Content-Type': 'application/json'}, data=json.dumps(bad_place_book_10))
+        rv = self.app.post('/places/1/books', data=bad_place_book_10)
         self.assertEqual(rv.status_code, 410)
 
         ''' Test if already booked and surrounds booking '''
-        rv = self.app.post('/places/1/books', headers={'Content-Type': 'application/json'}, data=json.dumps(bad_place_book_11))
+        rv = self.app.post('/places/1/books', data=bad_place_book_11)
         self.assertEqual(rv.status_code, 410)
 
     def test_list(self):
         ''' Set base data '''
-        rv = self.app.post('/users', headers={'Content-Type': 'application/json'}, data=json.dumps(good_user_1))
+        rv = self.app.post('/users', data=good_user_1)
         self.assertEqual(rv.status_code, 201)
-        rv = self.app.post('/users', headers={'Content-Type': 'application/json'}, data=json.dumps(good_user_2))
+        rv = self.app.post('/users', data=good_user_2)
         self.assertEqual(rv.status_code, 201)
-        rv = self.app.post('/states', headers={'Content-Type': 'application/json'}, data=json.dumps(good_state_1))
+        rv = self.app.post('/states', data=good_state_1)
         self.assertEqual(rv.status_code, 201)
-        rv = self.app.post('/states/1/cities', headers={'Content-Type': 'application/json'}, data=json.dumps(good_city_1))
+        rv = self.app.post('/states/1/cities', data=good_city_1)
         self.assertEqual(rv.status_code, 201)
-        rv = self.app.post('/places', headers={'Content-Type': 'application/json'}, data=json.dumps(good_place_1))
+        rv = self.app.post('/places', data=good_place_1)
         self.assertEqual(rv.status_code, 201)
 
         ''' Test if place does not exist '''
@@ -129,7 +129,7 @@ class AppTestCase(unittest.TestCase):
         self.assertEqual(len(data), 0)
 
         ''' Create new booking '''
-        rv = self.app.post('/places/1/books', headers={'Content-Type': 'application/json'}, data=json.dumps(good_place_book_1))
+        rv = self.app.post('/places/1/books', data=good_place_book_1)
         self.assertEqual(rv.status_code, 201)
 
         ''' Confirm one booking exists '''
@@ -140,17 +140,17 @@ class AppTestCase(unittest.TestCase):
 
     def test_get(self):
         ''' Set base data '''
-        rv = self.app.post('/users', headers={'Content-Type': 'application/json'}, data=json.dumps(good_user_1))
+        rv = self.app.post('/users', data=good_user_1)
         self.assertEqual(rv.status_code, 201)
-        rv = self.app.post('/users', headers={'Content-Type': 'application/json'}, data=json.dumps(good_user_2))
+        rv = self.app.post('/users', data=good_user_2)
         self.assertEqual(rv.status_code, 201)
-        rv = self.app.post('/states', headers={'Content-Type': 'application/json'}, data=json.dumps(good_state_1))
+        rv = self.app.post('/states', data=good_state_1)
         self.assertEqual(rv.status_code, 201)
-        rv = self.app.post('/states/1/cities', headers={'Content-Type': 'application/json'}, data=json.dumps(good_city_1))
+        rv = self.app.post('/states/1/cities', data=good_city_1)
         self.assertEqual(rv.status_code, 201)
-        rv = self.app.post('/places', headers={'Content-Type': 'application/json'}, data=json.dumps(good_place_1))
+        rv = self.app.post('/places', data=good_place_1)
         self.assertEqual(rv.status_code, 201)
-        rv = self.app.post('/places/1/books', headers={'Content-Type': 'application/json'}, data=json.dumps(good_place_book_1))
+        rv = self.app.post('/places/1/books', data=good_place_book_1)
         self.assertEqual(rv.status_code, 201)
 
         ''' Test if place does not exist '''
@@ -169,17 +169,17 @@ class AppTestCase(unittest.TestCase):
 
     def test_delete(self):
         ''' Set base data '''
-        rv = self.app.post('/users', headers={'Content-Type': 'application/json'}, data=json.dumps(good_user_1))
+        rv = self.app.post('/users', data=good_user_1)
         self.assertEqual(rv.status_code, 201)
-        rv = self.app.post('/users', headers={'Content-Type': 'application/json'}, data=json.dumps(good_user_2))
+        rv = self.app.post('/users', data=good_user_2)
         self.assertEqual(rv.status_code, 201)
-        rv = self.app.post('/states', headers={'Content-Type': 'application/json'}, data=json.dumps(good_state_1))
+        rv = self.app.post('/states', data=good_state_1)
         self.assertEqual(rv.status_code, 201)
-        rv = self.app.post('/states/1/cities', headers={'Content-Type': 'application/json'}, data=json.dumps(good_city_1))
+        rv = self.app.post('/states/1/cities', data=good_city_1)
         self.assertEqual(rv.status_code, 201)
-        rv = self.app.post('/places', headers={'Content-Type': 'application/json'}, data=json.dumps(good_place_1))
+        rv = self.app.post('/places', data=good_place_1)
         self.assertEqual(rv.status_code, 201)
-        rv = self.app.post('/places/1/books', headers={'Content-Type': 'application/json'}, data=json.dumps(good_place_book_1))
+        rv = self.app.post('/places/1/books', data=good_place_book_1)
         self.assertEqual(rv.status_code, 201)
 
         ''' Test if place does not exist '''
@@ -207,63 +207,63 @@ class AppTestCase(unittest.TestCase):
 
     def test_update(self):
         ''' Set base data '''
-        rv = self.app.post('/users', headers={'Content-Type': 'application/json'}, data=json.dumps(good_user_1))
+        rv = self.app.post('/users', data=good_user_1)
         self.assertEqual(rv.status_code, 201)
-        rv = self.app.post('/users', headers={'Content-Type': 'application/json'}, data=json.dumps(good_user_2))
+        rv = self.app.post('/users', data=good_user_2)
         self.assertEqual(rv.status_code, 201)
-        rv = self.app.post('/states', headers={'Content-Type': 'application/json'}, data=json.dumps(good_state_1))
+        rv = self.app.post('/states', data=good_state_1)
         self.assertEqual(rv.status_code, 201)
-        rv = self.app.post('/states/1/cities', headers={'Content-Type': 'application/json'}, data=json.dumps(good_city_1))
+        rv = self.app.post('/states/1/cities', data=good_city_1)
         self.assertEqual(rv.status_code, 201)
-        rv = self.app.post('/places', headers={'Content-Type': 'application/json'}, data=json.dumps(good_place_1))
+        rv = self.app.post('/places', data=good_place_1)
         self.assertEqual(rv.status_code, 201)
-        rv = self.app.post('/places', headers={'Content-Type': 'application/json'}, data=json.dumps(good_place_2))
+        rv = self.app.post('/places', data=good_place_2)
         self.assertEqual(rv.status_code, 201)
-        rv = self.app.post('/places/1/books', headers={'Content-Type': 'application/json'}, data=json.dumps(good_place_book_1))
+        rv = self.app.post('/places/1/books', data=good_place_book_1)
         self.assertEqual(rv.status_code, 201)
 
         ''' Test if place does not exist '''
-        rv = self.app.delete('/places/404/books/1', headers={'Content-Type': 'application/json'}, data=json.dumps({}))
+        rv = self.app.delete('/places/404/books/1', data={})
         self.assertEqual(rv.status_code, 404)
 
         ''' Test if booking does not exist '''
-        rv = self.app.delete('/places/1/books/404', headers={'Content-Type': 'application/json'}, data=json.dumps({}))
+        rv = self.app.delete('/places/1/books/404', data={})
         self.assertEqual(rv.status_code, 404)
 
         ''' Test if place, booking combo does not exist '''
-        rv = self.app.delete('/places/2/books/1', headers={'Content-Type': 'application/json'}, data=json.dumps({}))
+        rv = self.app.delete('/places/2/books/1', data={})
         self.assertEqual(rv.status_code, 404)
 
         ''' Test if attempting to update the 'user_id' '''
-        rv = self.app.put('/places/1/books/1', headers={'Content-Type': 'application/json'}, data=json.dumps({'user_id': 2}))
+        rv = self.app.put('/places/1/books/1', data={'user_id': 2})
         self.assertEqual(rv.status_code, 403)
 
         ''' Test if is_validated is an invalid type '''
-        rv = self.app.put('/places/1/books/1', headers={'Content-Type': 'application/json'}, data=json.dumps({'is_validated': 400}))
+        rv = self.app.put('/places/1/books/1', data={'is_validated': 400})
         self.assertEqual(rv.status_code, 400)
 
         ''' Test if date_start is an invalid type '''
-        rv = self.app.put('/places/1/books/1', headers={'Content-Type': 'application/json'}, data=json.dumps({'date_start': 400}))
+        rv = self.app.put('/places/1/books/1', data={'date_start': 400})
         self.assertEqual(rv.status_code, 400)
 
         ''' Test if date_start is not formatted correctly '''
-        rv = self.app.put('/places/1/books/1', headers={'Content-Type': 'application/json'}, data=json.dumps({'date_start': '07/24/1984'}))
+        rv = self.app.put('/places/1/books/1', data={'date_start': '07/24/1984'})
         self.assertEqual(rv.status_code, 400)
 
         ''' Test if number_nights is an invalid type '''
-        rv = self.app.put('/places/1/books/1', headers={'Content-Type': 'application/json'}, data=json.dumps({'number_nights': '400'}))
+        rv = self.app.put('/places/1/books/1', data={'number_nights': 'Nope'})
         self.assertEqual(rv.status_code, 400)
 
         ''' Test updating is_validated '''
-        rv = self.app.put('/places/1/books/1', headers={'Content-Type': 'application/json'}, data=json.dumps({'is_validated': True}))
+        rv = self.app.put('/places/1/books/1', data={'is_validated': True})
         self.assertEqual(rv.status_code, 200)
 
         ''' Test updating data_start '''
-        rv = self.app.put('/places/1/books/1', headers={'Content-Type': 'application/json'}, data=json.dumps({'date_start': datetime.now().strftime("%Y/%m/%d %H:%M:%S")}))
+        rv = self.app.put('/places/1/books/1', data={'date_start': datetime.now().strftime("%Y/%m/%d %H:%M:%S")})
         self.assertEqual(rv.status_code, 200)
 
         ''' Test updating number_nights '''
-        rv = self.app.put('/places/1/books/1', headers={'Content-Type': 'application/json'}, data=json.dumps({'number_nights': 20}))
+        rv = self.app.put('/places/1/books/1', data={'number_nights': 20})
         self.assertEqual(rv.status_code, 200)
 
         '''Check that updates were processed '''

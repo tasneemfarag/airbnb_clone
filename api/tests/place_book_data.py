@@ -34,7 +34,7 @@ bad_place_book_3 = {
 }
 
 bad_place_book_4 = {
-	'user_id': '500',
+	'user_id': 'Nope',
 	'is_validated': True,
 	'date_start': datetime.now().strftime("%Y/%m/%d %H:%M:%S"),
 	'number_nights': 1
@@ -65,7 +65,7 @@ bad_place_book_8 = {
 	'user_id': 1,
 	'is_validated': True,
 	'date_start': datetime.now().strftime("%Y/%m/%d %H:%M:%S"),
-	'number_nights': '10'
+	'number_nights': 'Nope'
 }
 
 bad_date_9 = datetime.now() + timedelta(days=1)

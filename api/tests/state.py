@@ -25,29 +25,29 @@ class AppTestCase(unittest.TestCase):
 
     def test_create(self):
         ''' Test the create with valid data '''
-        rv = self.app.post('/states', headers={'Content-Type': 'application/json'}, data=json.dumps(good_state_1))
+        rv = self.app.post('/states', data=good_state_1)
         self.assertEqual(rv.status_code, 201)
         data = json.loads(rv.data)
         self.assertEqual(data['id'], 1)
-        rv = self.app.post('/states', headers={'Content-Type': 'application/json'}, data=json.dumps(good_state_2))
+        rv = self.app.post('/states', data=good_state_2)
         self.assertEqual(rv.status_code, 201)
         data = json.loads(rv.data)
         self.assertEqual(data['id'], 2)
 
         ''' Test if state is NULL '''
-        rv = self.app.post('/states', headers={'Content-Type': 'application/json'}, data=json.dumps(bad_state_1))
+        rv = self.app.post('/states', data=bad_state_1)
         self.assertEqual(rv.status_code, 400)
 
         ''' Test if name  value type is invalid '''
-        rv = self.app.post('/states', headers={'Content-Type': 'application/json'}, data=json.dumps(bad_state_2))
+        rv = self.app.post('/states', data=bad_state_2)
         self.assertEqual(rv.status_code, 400)
 
         ''' Test if name key is missing '''
-        rv = self.app.post('/states', headers={'Content-Type': 'application/json'}, data=json.dumps(bad_state_3))
+        rv = self.app.post('/states', data=bad_state_3)
         self.assertEqual(rv.status_code, 400)
 
         ''' Test that two states cannot be the same name '''
-        rv = self.app.post('/states', headers={'Content-Type': 'application/json'}, data=json.dumps(good_state_1))
+        rv = self.app.post('/states', data=good_state_1)
         rv = self.assertEqual(rv.status_code, 409)
 
     def test_list(self):
@@ -58,7 +58,7 @@ class AppTestCase(unittest.TestCase):
         self.assertEqual(len(data), 0)
 
         ''' Create a new state '''
-        rv = self.app.post('/states', headers={'Content-Type': 'application/json'}, data=json.dumps(good_state_1))
+        rv = self.app.post('/states', data=good_state_1)
         self.assertEqual(rv.status_code, 201)
 
         ''' Test that there is one state returned '''
@@ -69,7 +69,7 @@ class AppTestCase(unittest.TestCase):
 
     def test_get(self):
         ''' Set base data '''
-        rv = self.app.post('/states', headers={'Content-Type': 'application/json'}, data=json.dumps(good_state_1))
+        rv = self.app.post('/states', data=good_state_1)
         self.assertEqual(rv.status_code, 201)
 
         ''' Test if state doesn't exist '''
@@ -86,7 +86,7 @@ class AppTestCase(unittest.TestCase):
 
     def test_delete(self):
         ''' Set base data '''
-        rv = self.app.post('/states', headers={'Content-Type': 'application/json'}, data=json.dumps(good_state_1))
+        rv = self.app.post('/states', data=good_state_1)
         self.assertEqual(rv.status_code, 201)
 
         ''' Test if state doesn't exist '''

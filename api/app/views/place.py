@@ -6,6 +6,7 @@ from app.models.state import State
 from app.models.user import User
 from app.models.place_book import PlaceBook
 from return_styles import ListStyle
+from index import type_test
 
 ''' Import packages '''
 from flask_json import as_json, request
@@ -23,7 +24,10 @@ def get_places():
 @app.route('/places', methods=['POST'])
 @as_json
 def create_place():
-    data = json.loads(request.data)
+    data = {}
+    for key in request.form.keys():
+    	for value in request.form.getlist(key):
+    		data[key] = value
     try:
         ''' Check for required keys '''
         if not 'owner_id' in data:
@@ -34,27 +38,27 @@ def create_place():
             raise KeyError('city_id')
 
         ''' Check required key value data types '''
-        if not isinstance(data['owner_id'], int):
+        if not type_test(data['owner_id'], int):
             raise TypeError('owner_id is not an integer')
-        if not isinstance(data['name'], unicode):
+        if not type_test(data['name'], 'string'):
             raise TypeError('name is not a string')
-        if not isinstance(data['city_id'], int):
+        if not type_test(data['city_id'], int):
             raise TypeError('city_id is not an integer')
 
         ''' Check optional key value data types '''
-        if 'description' in data and not isinstance(data['description'], unicode):
+        if 'description' in data and not type_test(data['description'], 'string'):
             raise TypeError('description is not a string')
-        if 'number_rooms' in data and not isinstance(data['number_rooms'], int):
+        if 'number_rooms' in data and not type_test(data['number_rooms'], int):
             raise TypeError('number_rooms is not an integer')
-        if 'number_bathrooms' in data and not isinstance(data['number_bathrooms'], int):
+        if 'number_bathrooms' in data and not type_test(data['number_bathrooms'], int):
             raise TypeError('number_bathrooms is not an integer')
-        if 'max_guest' in data and not isinstance(data['max_guest'], int):
+        if 'max_guest' in data and not type_test(data['max_guest'], int):
             raise TypeError('max_guest is not an integer')
-        if 'price_by_night' in data and not isinstance(data['price_by_night'], int):
+        if 'price_by_night' in data and not type_test(data['price_by_night'], int):
             raise TypeError('price_by_night is not an integer')
-        if 'latitude' in data and not isinstance(data['latitude'], float):
+        if 'latitude' in data and not type_test(data['latitude'], float):
             raise TypeError('latitude is not a float')
-        if 'longitude' in data and not isinstance(data['longitude'], float):
+        if 'longitude' in data and not type_test(data['longitude'], float):
             raise TypeError('longitude is not a float')
 
         ''' Check if city_id exists '''
@@ -132,7 +136,10 @@ def get_place(place_id):
 def update_place(place_id):
     ''' Updates a given place '''
     try:
-        data = json.loads(request.data)
+        data = {}
+        for key in request.form.keys():
+        	for value in request.form.getlist(key):
+        		data[key] = value
 
         ''' Check if place_id exists '''
         query = Place.select().where(Place.id == place_id)
@@ -146,21 +153,21 @@ def update_place(place_id):
             raise ValueError('City cannot be changed')
 
         ''' Check for valid data types '''
-        if 'name' in data and not isinstance(data['name'], unicode):
+        if 'name' in data and not type_test(data['name'], 'string'):
             raise TypeError('name is not a string')
-        if 'description' in data and not isinstance(data['description'], unicode):
+        if 'description' in data and not type_test(data['description'], 'string'):
             raise TypeError('description is not a string')
-        if 'number_rooms' in data and not isinstance(data['number_rooms'], int):
+        if 'number_rooms' in data and not type_test(data['number_rooms'], int):
             raise TypeError('number_rooms is not an integer')
-        if 'number_bathrooms' in data and not isinstance(data['number_bathrooms'], int):
+        if 'number_bathrooms' in data and not type_test(data['number_bathrooms'], int):
             raise TypeError('number_bathrooms is not an integer')
-        if 'max_guest' in data and not isinstance(data['max_guest'], int):
+        if 'max_guest' in data and not type_test(data['max_guest'], int):
             raise TypeError('max_guest is not an integer')
-        if 'price_by_night' in data and not isinstance(data['price_by_night'], int):
+        if 'price_by_night' in data and not type_test(data['price_by_night'], int):
             raise TypeError('price_by_night is not an integer')
-        if 'latitude' in data and not isinstance(data['latitude'], float):
+        if 'latitude' in data and not type_test(data['latitude'], float):
             raise TypeError('latitude is not a float')
-        if 'longitude' in data and not isinstance(data['longitude'], float):
+        if 'longitude' in data and not type_test(data['longitude'], float):
             raise TypeError('longitude is not a float')
 
         place = Place.get(Place.id == place_id)
@@ -257,7 +264,10 @@ def get_places_by_city(state_id, city_id):
 def create_place_by_city(state_id, city_id):
     ''' Creates a new place in a city '''
     try:
-        data = json.loads(request.data)
+        data = {}
+        for key in request.form.keys():
+        	for value in request.form.getlist(key):
+        		data[key] = value
 
         ''' Check for required keys '''
         if not 'owner_id' in data:
@@ -266,25 +276,25 @@ def create_place_by_city(state_id, city_id):
             raise KeyError('name')
 
         ''' Check required key value data types '''
-        if not isinstance(data['owner_id'], int):
+        if not type_test(data['owner_id'], int):
             raise TypeError('owner_id is not an integer')
-        if not isinstance(data['name'], unicode):
+        if not type_test(data['name'], 'string'):
             raise TypeError('name is not a string')
 
         ''' Check optional key value data types '''
-        if 'description' in data and not isinstance(data['description'], unicode):
+        if 'description' in data and not type_test(data['description'], 'string'):
             raise TypeError('description is not a string')
-        if 'number_rooms' in data and not isinstance(data['number_rooms'], int):
+        if 'number_rooms' in data and not type_test(data['number_rooms'], int):
             raise TypeError('number_rooms is not an integer')
-        if 'number_bathrooms' in data and not isinstance(data['number_bathrooms'], int):
+        if 'number_bathrooms' in data and not type_test(data['number_bathrooms'], int):
             raise TypeError('number_bathrooms is not an integer')
-        if 'max_guest' in data and not isinstance(data['max_guest'], int):
+        if 'max_guest' in data and not type_test(data['max_guest'], int):
             raise TypeError('max_guest is not an integer')
-        if 'price_by_night' in data and not isinstance(data['price_by_night'], int):
+        if 'price_by_night' in data and not type_test(data['price_by_night'], int):
             raise TypeError('price_by_night is not an integer')
-        if 'latitude' in data and not isinstance(data['latitude'], float):
+        if 'latitude' in data and not type_test(data['latitude'], float):
             raise TypeError('latitude is not a float')
-        if 'longitude' in data and not isinstance(data['longitude'], float):
+        if 'longitude' in data and not type_test(data['longitude'], float):
             raise TypeError('longitude is not a float')
 
         ''' Check if the state_id exists '''
@@ -381,7 +391,10 @@ def get_places_by_state(state_id):
 def get_place_availability(place_id):
     ''' Return availability of given place '''
     try:
-        data = json.loads(request.data)
+        data = {}
+        for key in request.form.keys():
+        	for value in request.form.getlist(key):
+        		data[key] = value
         ''' Check for required keys '''
         if not 'year' in data:
             raise KeyError('year')
@@ -391,26 +404,25 @@ def get_place_availability(place_id):
             raise KeyError('day')
 
         ''' Check for valid data types '''
-        if not isinstance(data['year'], int):
+        if not type_test(data['year'], int):
             raise TypeError('year')
-        if not isinstance(data['month'], int):
+        if not type_test(data['month'], int):
             raise TypeError('month')
-        if not isinstance(data['day'], int):
+        if not type_test(data['day'], int):
             raise TypeError('day')
-
         ''' Check if place exists '''
         query = Place.select().where(Place.id == place_id)
         if not query.exists():
             raise LookupError('place_id')
 
         ''' Set datetime object to compare '''
-        check_date = datetime(data['year'], data['month'], data['day'])
+        check_date = datetime(int(data['year']), int(data['month']), int(data['day']))
 
         ''' Check if date is already booked '''
         bookings = PlaceBook.select().where(PlaceBook.place == place_id)
         for booking in bookings:
             date_start = booking.date_start.replace(hour=0, minute=0, second=0)
-            date_end = date_start + timedelta(days= booking.number_nights)
+            date_end = date_start + timedelta(days= int(booking.number_nights))
             if check_date >= date_start and check_date < date_end:
                 return {'available': False}, 200
         return {'available': True}, 200

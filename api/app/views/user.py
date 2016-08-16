@@ -2,6 +2,7 @@
 from app import app
 from app.models.user import User
 from return_styles import ListStyle
+from index import type_test
 
 ''' Import packages '''
 from flask_json import as_json, request
@@ -22,7 +23,10 @@ def create_user():
 
     ''' Creates a new user '''
     try:
-        data = json.loads(request.data)
+        data = {}
+        for key in request.form.keys():
+           for value in request.form.getlist(key):
+               data[key] = value
 
         ''' Test for required keys '''
         if not 'email' in data:
@@ -35,18 +39,19 @@ def create_user():
             raise KeyError('password')
 
         ''' Test required key value data types '''
-        if not isinstance(data['email'], unicode):
-            raise TypeError('email is not a string')
-        if not isinstance(data['first_name'], unicode):
+        if not type_test(data['email'], 'email'):
+            raise TypeError('email is not valid')
+        if not type_test(data['first_name'], 'string'):
             raise TypeError('first_name is not a string')
-        if not isinstance(data['last_name'], unicode):
+        if not type_test(data['last_name'], 'string'):
             raise TypeError('last_name is not a string')
-        if not isinstance(data['password'], unicode):
+        if not type_test(data['password'], 'string'):
             raise TypeError('password is not a string')
 
         ''' Test optional key value data types '''
-        if 'is_admin' in data and not isinstance(data['is_admin'], bool):
-            raise TypeError('is_admin is not a boolean value')
+        if 'is_admin' in data:
+            if not type_test(data['is_admin'], bool):
+                raise TypeError('is_admin is not a True or False value')
 
         ''' Test if email already exists in the db '''
         query = User.select().where(User.email == data['email'])
@@ -107,20 +112,23 @@ def get_user(user_id):
 @as_json
 def update_user(user_id):
     ''' Updates user information '''
-    data = json.loads(request.data)
+    data = {}
+    for key in request.form.keys():
+    	for value in request.form.getlist(key):
+    		data[key] = value
     try:
         ''' Check if protected fields are included '''
         if 'email' in data:
             raise ValueError("Email cannot be changed")
 
         ''' Check for valid data types '''
-        if 'first_name' in data and not isinstance(data['first_name'], unicode):
+        if 'first_name' in data and not type_test(data['first_name'], 'string'):
             raise TypeError('first_name is not a string')
-        if 'last_name' in data and not isinstance(data['last_name'], unicode):
+        if 'last_name' in data and not type_test(data['last_name'], 'string'):
             raise TypeError('last_name is not a string')
-        if 'is_admin' in data and not isinstance(data['is_admin'], bool):
+        if 'is_admin' in data and not type_test(data['is_admin'], bool):
             raise TypeError('is_admin is not a boolean value')
-        if 'password' in data and not isinstance(data['password'], unicode):
+        if 'password' in data and not type_test(data['password'], 'string'):
             raise TypeError('password is not a string')
 
         ''' Check if user_id exists '''
@@ -136,7 +144,10 @@ def update_user(user_id):
             elif key == 'last_name':
                 user.last_name = data['last_name']
             elif key == 'is_admin':
-                user.is_admin = data['is_admin']
+                if data['is_admin'] == 'True':
+                    user.is_admin = True
+                else:
+                    user.is_admin = False
             elif key == 'password':
                 user.set_password(data['password'])
         user.save()

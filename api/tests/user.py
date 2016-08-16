@@ -26,49 +26,49 @@ class AppTestCase(unittest.TestCase):
 
     def test_create(self):
         ''' Test the creation of a new user '''
-        rv = self.app.post('/users', headers={'Content-Type': 'application/json'}, data=json.dumps(good_user_1))
+        rv = self.app.post('/users', data=good_user_1)
         self.assertEqual(rv.status_code, 201)
         data = json.loads(rv.data)
         self.assertEqual(data['id'], 1)
 
         ''' Test for missing email '''
-        rv = self.app.post('/users', headers={'Content-Type': 'application/json'}, data=json.dumps(bad_user_1))
+        rv = self.app.post('/users', data=bad_user_1)
         self.assertEqual(rv.status_code, 400)
 
         ''' Test for missing first_name '''
-        rv = self.app.post('/users', headers={'Content-Type': 'application/json'}, data=json.dumps(bad_user_2))
+        rv = self.app.post('/users', data=bad_user_2)
         self.assertEqual(rv.status_code, 400)
 
         ''' Test for missing last_name '''
-        rv = self.app.post('/users', headers={'Content-Type': 'application/json'}, data=json.dumps(bad_user_3))
+        rv = self.app.post('/users', data=bad_user_3)
         self.assertEqual(rv.status_code, 400)
 
         ''' Test for missing password '''
-        rv = self.app.post('/users', headers={'Content-Type': 'application/json'}, data=json.dumps(bad_user_4))
+        rv = self.app.post('/users', data=bad_user_4)
         self.assertEqual(rv.status_code, 400)
 
         ''' Test for invalid email '''
-        rv = self.app.post('/users', headers={'Content-Type': 'application/json'}, data=json.dumps(bad_user_5))
+        rv = self.app.post('/users', data=bad_user_5)
         self.assertEqual(rv.status_code, 400)
 
         ''' Test for invalid first_name '''
-        rv = self.app.post('/users', headers={'Content-Type': 'application/json'}, data=json.dumps(bad_user_6))
+        rv = self.app.post('/users', data=bad_user_6)
         self.assertEqual(rv.status_code, 400)
 
         ''' Test for invalid last_name '''
-        rv = self.app.post('/users', headers={'Content-Type': 'application/json'}, data=json.dumps(bad_user_7))
+        rv = self.app.post('/users', data=bad_user_7)
         self.assertEqual(rv.status_code, 400)
 
         ''' Test for invalid is_admin '''
-        rv = self.app.post('/users', headers={'Content-Type': 'application/json'}, data=json.dumps(bad_user_8))
+        rv = self.app.post('/users', data=bad_user_8)
         self.assertEqual(rv.status_code, 400)
 
         ''' Test for invalid password '''
-        rv = self.app.post('/users', headers={'Content-Type': 'application/json'}, data=json.dumps(bad_user_9))
+        rv = self.app.post('/users', data=bad_user_9)
         self.assertEqual(rv.status_code, 400)
 
         ''' Test if user already exists '''
-        rv = self.app.post('/users', headers={'Content-Type': 'application/json'}, data=json.dumps(good_user_1))
+        rv = self.app.post('/users', data=good_user_1)
         rv = self.assertEqual(rv.status_code, 409)
 
     def test_list(self):
@@ -79,7 +79,7 @@ class AppTestCase(unittest.TestCase):
         self.assertEqual(len(data['data']), 0)
 
         ''' Create a new user '''
-        rv = self.app.post('/users', headers={'Content-Type': 'application/json'}, data=json.dumps(good_user_1))
+        rv = self.app.post('/users', data=good_user_1)
         self.assertEqual(rv.status_code, 201)
 
         ''' Test that one user exists '''
@@ -90,7 +90,7 @@ class AppTestCase(unittest.TestCase):
 
     def test_get(self):
         ''' Set base data '''
-        rv = self.app.post('/users', headers={'Content-Type': 'application/json'}, data=json.dumps(good_user_1))
+        rv = self.app.post('/users', data=good_user_1)
         self.assertEqual(rv.status_code, 201)
 
         ''' Test if user does not exist '''
@@ -107,7 +107,7 @@ class AppTestCase(unittest.TestCase):
 
     def test_delete(self):
         ''' Set base data '''
-        rv = self.app.post('/users', headers={'Content-Type': 'application/json'}, data=json.dumps(good_user_1))
+        rv = self.app.post('/users', data=good_user_1)
         self.assertEqual(rv.status_code, 201)
 
         ''' Test that one user exists '''
@@ -132,16 +132,16 @@ class AppTestCase(unittest.TestCase):
 
     def test_update(self):
         ''' Set base data '''
-        rv = self.app.post('/users', headers={'Content-Type': 'application/json'}, data=json.dumps(good_user_1))
+        rv = self.app.post('/users', data=good_user_1)
         self.assertEqual(rv.status_code, 201)
 
         ''' Test that email cannot be updated '''
-        rv = self.app.put('/users/1', headers={'Content-Type': 'application/json'}, data=json.dumps({'email': 'update@superawesome.com'}))
+        rv = self.app.put('/users/1', data={'email': 'update@superawesome.com'})
         self.assertEqual(rv.status_code, 403)
 
         ''' Test updating first_name '''
         timestamp = datetime.now()
-        rv = self.app.put('/users/1', headers={'Content-Type': 'application/json'}, data=json.dumps({'first_name': 'Change'}))
+        rv = self.app.put('/users/1', data={'first_name': 'Change'})
         self.assertEqual(rv.status_code, 200)
 
         ''' Test that time created and updated match expected time '''
@@ -151,31 +151,31 @@ class AppTestCase(unittest.TestCase):
         self.assertTrue(abs(datetime.strptime(data['updated_at'],"%Y/%m/%d %H:%M:%S") - timestamp) < timedelta(seconds=3))
 
         ''' Test updating last_name '''
-        rv = self.app.put('/users/1', headers={'Content-Type': 'application/json'}, data=json.dumps({'last_name': 'User'}))
+        rv = self.app.put('/users/1', data={'last_name': 'User'})
         self.assertEqual(rv.status_code, 200)
 
         ''' Test updating is_admin '''
-        rv = self.app.put('/users/1', headers={'Content-Type': 'application/json'}, data=json.dumps({'is_admin': False}))
+        rv = self.app.put('/users/1', data={'is_admin': False})
         self.assertEqual(rv.status_code, 200)
 
         ''' Test updating password '''
-        rv = self.app.put('/users/1', headers={'Content-Type': 'application/json'}, data=json.dumps({'password': 'notthesame'}))
+        rv = self.app.put('/users/1', data={'password': 'notthesame'})
         self.assertEqual(rv.status_code, 200)
 
         ''' Test for invalid first_name '''
-        rv = self.app.put('/users/1', headers={'Content-Type': 'application/json'}, data=json.dumps({'first_name': 400}))
+        rv = self.app.put('/users/1', data={'first_name': 400})
         self.assertEqual(rv.status_code, 400)
 
         ''' Test for invalid last_name '''
-        rv = self.app.put('/users/1', headers={'Content-Type': 'application/json'}, data=json.dumps({'last_name': 400}))
+        rv = self.app.put('/users/1', data={'last_name': 400})
         self.assertEqual(rv.status_code, 400)
 
         ''' Test for invalid is_admin '''
-        rv = self.app.put('/users/1', headers={'Content-Type': 'application/json'}, data=json.dumps({'is_admin': 'Nope'}))
+        rv = self.app.put('/users/1', data={'is_admin': 'Nope'})
         self.assertEqual(rv.status_code, 400)
 
         ''' Test for invalid password '''
-        rv = self.app.put('/users/1', headers={'Content-Type': 'application/json'}, data=json.dumps({'password': 400}))
+        rv = self.app.put('/users/1', data={'password': 400})
         self.assertEqual(rv.status_code, 400)
 
         ''' Test that expected updates occurred '''
@@ -188,7 +188,7 @@ class AppTestCase(unittest.TestCase):
         self.assertNotEqual(user['is_admin'], good_user_1['is_admin'])
 
         ''' Test if user does not exist '''
-        rv = self.app.put('/users/404', headers={'Content-Type': 'application/json'}, data=json.dumps({'first_name': 'Change'}))
+        rv = self.app.put('/users/404', data={'first_name': 'Change'})
         self.assertEqual(rv.status_code, 404)
 
 if __name__ == '__main__':
