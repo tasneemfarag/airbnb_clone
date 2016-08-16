@@ -1,5 +1,3 @@
-from config import *
-
 # Sample Gunicorn configuration file.
 
 #
