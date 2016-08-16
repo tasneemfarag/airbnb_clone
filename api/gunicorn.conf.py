@@ -20,7 +20,7 @@ from config import *
 #       range.
 #
 
-bind = HOST + ':' + str(PORT)
+bind = '0.0.0.0:3000'
 backlog = 2048
 
 #
