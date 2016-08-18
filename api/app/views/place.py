@@ -17,13 +17,109 @@ import json
 @app.route('/places', methods=['GET'])
 @as_json
 def get_places():
-    ''' Returns all places in a list named result '''
+    """
+    Get all places
+    List all places in the database.
+    ---
+    tags:
+        - Place
+    responses:
+        200:
+            description: List of all places
+            schema:
+                id: Places
+                required:
+                    - data
+                    - paging
+                properties:
+                    data:
+                        type: array
+                        description: places array
+                        items:
+                            $ref: '#/definitions/get_place_get_Place'
+                    paging:
+                        description: pagination
+                        schema:
+                            $ref: '#/definitions/get_amenities_get_Paging'
+    """
     data = Place.select()
     return ListStyle.list(data, request), 200
 
 @app.route('/places', methods=['POST'])
 @as_json
 def create_place():
+    """
+    Create a new place
+    Create a new place in the database
+    ---
+    tags:
+        - Place
+    parameters:
+        -
+            name: owner_id
+            in: form
+            type: integer
+            required: True
+            description: user id of the owner
+        -
+            name: city_id
+            in: form
+            type: integer
+            required: True
+            description: id of the city
+        -
+            name: name
+            in: form
+            type: string
+            required: True
+            description: name of the place
+        -
+            name: description
+            in: form
+            type: string
+            description: description of the place
+        -
+            name: number_rooms
+            in: form
+            type: integer
+            description: number of rooms
+        -
+            name: number_bathrooms
+            in: form
+            type: integer
+            description: number of bathrooms
+        -
+            name: max_guest
+            in: form
+            type: integer
+            description: the max number of guests
+        -
+            name: price_by_night
+            in: form
+            type: integer
+            description: the price per night of the location
+        -
+            name: latitude
+            in: form
+            type: float
+            description: the latitude of the place location
+        -
+            name: longitude
+            in: form
+            type: float
+            description: the longitude of the place location
+    responses:
+        201:
+            description: Place was created
+            schema:
+                $ref: '#/definitions/create_amenity_post_post_success'
+        400:
+            description: Issue with place request
+        404:
+            description: Owner or city was not found
+        500:
+            description: The request was not able to be processed
+    """
     data = {}
     for key in request.form.keys():
     	for value in request.form.getlist(key):
@@ -116,7 +212,89 @@ def create_place():
 @app.route('/places/<place_id>', methods=['GET'])
 @as_json
 def get_place(place_id):
-    ''' Gets a given place '''
+    """
+    Get the given place
+    Returns the given place in the database.
+    ---
+    tags:
+        - Place
+    parameters:
+        -
+            in: path
+            name: place_id
+            type: integer
+            required: True
+            description: ID of the place
+    responses:
+        200:
+            description: Place returned successfully
+            schema:
+                id: Place
+                required:
+                    - owner_id
+                    - city_id
+                    - name
+                    - id
+                    - created_at
+                    - updated_at
+                properties:
+                    owner_id:
+                        type: integer
+                        description: user id of the owner
+                        default: 1
+                    city_id:
+                        type: integer
+                        description: id of the city
+                        default: 1
+                    name:
+                        type: string
+                        description: name of the place
+                        default: 'Amazing view near San Francisco'
+                    description:
+                        type: string
+                        description: description of the place
+                        default: "The place is located on the ocean's edge... literally."
+                    number_rooms:
+                        type: integer
+                        description: number of rooms
+                        default: 3
+                    number_bathrooms:
+                        type: integer
+                        description: number of bathrooms
+                        default: 2
+                    max_guest:
+                        type: integer
+                        description: the max number of guests
+                        default: 6
+                    price_by_night:
+                        type: integer
+                        description: the price per night of the location
+                        default: 200
+                    latitude:
+                        type: float
+                        description: the latitude of the place location
+                        default: 37.642357
+                    longitude:
+                        type: float
+                        description: the longitude of the place location
+                        default: -122.493439
+                    id:
+                        type: integer
+                        description: id of the place
+                        default: 1
+                    created_at:
+                        type: datetime string
+                        description: date and time the booking was created in the database
+                        default: '2016-08-11 20:30:38'
+                    updated_at:
+                        type: datetime string
+                        description: date and time the booking was updated in the database
+                        default: '2016-08-11 20:30:38'
+        404:
+            description: Place, owner or city was not found
+        500:
+            description: Request could not be processed
+    """
     try:
         ''' Check if place_id exists '''
         query = Place.select().where(Place.id == place_id)
@@ -134,7 +312,73 @@ def get_place(place_id):
 @app.route('/places/<place_id>', methods=['PUT'])
 @as_json
 def update_place(place_id):
-    ''' Updates a given place '''
+    """
+    Update a place
+    Update a place in the database
+    ---
+    tags:
+        - Place
+    parameters:
+        -
+            name: place_id
+            in: path
+            type: integer
+            required: True
+            description: ID of the place
+        -
+            name: name
+            in: form
+            type: string
+            description: name of the place
+        -
+            name: description
+            in: form
+            type: string
+            description: description of the place
+        -
+            name: number_rooms
+            in: form
+            type: integer
+            description: number of rooms
+        -
+            name: number_bathrooms
+            in: form
+            type: integer
+            description: number of bathrooms
+        -
+            name: max_guest
+            in: form
+            type: integer
+            description: the max number of guests
+        -
+            name: price_by_night
+            in: form
+            type: integer
+            description: the price per night of the location
+        -
+            name: latitude
+            in: form
+            type: float
+            description: the latitude of the place location
+        -
+            name: longitude
+            in: form
+            type: float
+            description: the longitude of the place location
+    responses:
+        200:
+            description: Place was updated
+            schema:
+                $ref: '#/definitions/update_booking_put_put_success'
+        400:
+            description: Issue with booking update request
+        404:
+            description: Place was not found
+        410:
+            description: Place is unavailable for the requested booking
+        500:
+            description: The request was not able to be processed
+    """
     try:
         data = {}
         for key in request.form.keys():
@@ -211,7 +455,29 @@ def update_place(place_id):
 @app.route('/places/<place_id>', methods=['DELETE'])
 @as_json
 def delete_place(place_id):
-    ''' Deletes the given place '''
+    """
+    Delete the given place
+    Deletes the given place in the database.
+    ---
+    tags:
+        - Place
+    parameters:
+        -
+            in: path
+            name: place_id
+            type: integer
+            required: True
+            description: ID of the place
+    responses:
+        200:
+            description: Place deleted successfully
+            schema:
+                $ref: '#/definitions/delete_amenity_delete_delete_200'
+        404:
+            description: Place was not found
+        500:
+            description: Request could not be processed
+    """
     try:
         ''' Check if place_id exists '''
         query = Place.select().where(Place.id == place_id)
@@ -233,7 +499,31 @@ def delete_place(place_id):
 @app.route('/states/<state_id>/cities/<city_id>/places', methods=['GET'])
 @as_json
 def get_places_by_city(state_id, city_id):
-    ''' Gets all places in a city '''
+    """
+    Get all places
+    List all places in the given city in the database.
+    ---
+    tags:
+        - Place
+    parameters:
+        -
+            name: state_id
+            in: path
+            type: integer
+            required: True
+            description: ID of the state
+        -
+            name: city_id
+            in: path
+            type: integer
+            required: True
+            description: ID of the city
+    responses:
+        200:
+            description: List of all places
+            schema:
+                $ref: '#/definitions/get_places_get_Places'
+    """
     try:
         ''' Check if the state_id exists '''
         query = State.select().where(State.id == state_id)
@@ -262,7 +552,84 @@ def get_places_by_city(state_id, city_id):
 @app.route('/states/<state_id>/cities/<city_id>/places', methods=['POST'])
 @as_json
 def create_place_by_city(state_id, city_id):
-    ''' Creates a new place in a city '''
+    """
+    Create a new place
+    Create a new place in the given city
+    ---
+    tags:
+        - Place
+    parameters:
+        -
+            name: state_id
+            in: path
+            type: integer
+            required: True
+            description: id of the state
+        -
+            name: city_id
+            in: path
+            type: integer
+            required: True
+            description: id of the city
+        -
+            name: owner_id
+            in: form
+            type: integer
+            required: True
+            description: user id of the owner
+        -
+            name: name
+            in: form
+            type: string
+            required: True
+            description: name of the place
+        -
+            name: description
+            in: form
+            type: string
+            description: description of the place
+        -
+            name: number_rooms
+            in: form
+            type: integer
+            description: number of rooms
+        -
+            name: number_bathrooms
+            in: form
+            type: integer
+            description: number of bathrooms
+        -
+            name: max_guest
+            in: form
+            type: integer
+            description: the max number of guests
+        -
+            name: price_by_night
+            in: form
+            type: integer
+            description: the price per night of the location
+        -
+            name: latitude
+            in: form
+            type: float
+            description: the latitude of the place location
+        -
+            name: longitude
+            in: form
+            type: float
+            description: the longitude of the place location
+    responses:
+        201:
+            description: Place was created
+            schema:
+                $ref: '#/definitions/create_amenity_post_post_success'
+        400:
+            description: Issue with place request
+        404:
+            description: Owner or city was not found
+        500:
+            description: The request was not able to be processed
+    """
     try:
         data = {}
         for key in request.form.keys():
@@ -362,7 +729,25 @@ def create_place_by_city(state_id, city_id):
 @app.route('/states/<state_id>/places', methods=['GET'])
 @as_json
 def get_places_by_state(state_id):
-    ''' Gets all places in a state '''
+    """
+    Get all places by state
+    List all places in the given state in the database.
+    ---
+    tags:
+        - Place
+    parameters:
+        -
+            name: state_id
+            in: path
+            type: integer
+            required: True
+            description: ID of the state
+    responses:
+        200:
+            description: List of all places in state
+            schema:
+                $ref: '#/definitions/get_places_get_Places'
+    """
     try:
         ''' Check if state exists '''
         query = State.select().where(State.id == state_id)
@@ -389,7 +774,56 @@ def get_places_by_state(state_id):
 @app.route('/places/<place_id>/available', methods=['POST'])
 @as_json
 def get_place_availability(place_id):
-    ''' Return availability of given place '''
+    """
+    Checks availability of a place
+    Returns the availability of a place based on current bookings
+    ---
+    tags:
+        - Place
+    parameters:
+        -
+            name: place_id
+            in: path
+            type: integer
+            required: True
+            description: id of the place
+        -
+            name: year
+            in: form
+            type: integer
+            required: True
+            description: year of the requested date
+        -
+            name: month
+            in: form
+            type: integer
+            required: True
+            description: month of the requested date
+        -
+            name: day
+            in: form
+            type: integer
+            required: True
+            description: day of the requested date
+    responses:
+        200:
+            description: Place availability was returned
+            schema:
+                id: availability
+                required:
+                    - available
+                properties:
+                    available:
+                        type: boolean
+                        description: availability of the place
+                        default: False
+        400:
+            description: Issue with place availability request
+        404:
+            description: Place was not found
+        500:
+            description: The request was not able to be processed
+    """
     try:
         data = {}
         for key in request.form.keys():

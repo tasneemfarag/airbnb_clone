@@ -13,15 +13,85 @@ import json
 @app.route('/users', methods=['GET'])
 @as_json
 def get_users():
-    ''' Returns all users in list named result '''
+    """
+    Get all users
+    List all users in the database.
+    ---
+    tags:
+        - User
+    responses:
+        200:
+            description: List of all users
+            schema:
+                id: Users
+                required:
+                    - data
+                    - paging
+                properties:
+                    data:
+                        type: array
+                        description: users array
+                        items:
+                            $ref: '#/definitions/get_user_get_User'
+                    paging:
+                        description: pagination
+                        schema:
+                            $ref: '#/definitions/get_amenities_get_Paging'
+    """
     data = User.select()
     return ListStyle.list(data, request), 200
 
 @app.route('/users', methods=['POST'])
 @as_json
 def create_user():
-
-    ''' Creates a new user '''
+    """
+    Create a new user
+    Create a new user in the database
+    ---
+    tags:
+        - User
+    parameters:
+        -
+            name: email
+            in: form
+            type: string
+            required: True
+            description: Email of the user
+        -
+            name: first_name
+            in: form
+            type: string
+            required: True
+            description: First name of the user
+        -
+            name: last_name
+            in: form
+            type: string
+            required: True
+            description: Last name of the user
+        -
+            name: is_admin
+            in: form
+            type: boolean
+            description: Defines if the user is an admin
+        -
+            name: password
+            in: form
+            type: string
+            required: True
+            description: Password for the user
+    responses:
+        201:
+            description: User was created
+            schema:
+                $ref: '#/definitions/create_amenity_post_post_success'
+        400:
+            description: Issue with user request
+        409:
+            description: Email already exists
+        500:
+            description: The request was not able to be processed
+    """
     try:
         data = {}
         for key in request.form.keys():
@@ -93,7 +163,66 @@ def create_user():
 @app.route('/users/<user_id>', methods=['GET'])
 @as_json
 def get_user(user_id):
-    ''' Returns a specific user '''
+    """
+    Get the given user
+    Returns the given user in the database.
+    ---
+    tags:
+    	- User
+    parameters:
+    	-
+    		in: path
+    		name: user_id
+    		type: integer
+    		required: True
+    		description: ID of the user
+    responses:
+        200:
+            description: User returned successfully
+            schema:
+                id: User
+                required:
+                    - email
+                    - first_name
+                    - last_name
+                    - password
+                    - id
+                    - created_at
+                    - updated_at
+                properties:
+                    first_name:
+                        type: string
+                        description: First name of the user
+                        default: "Jon"
+                    last_name:
+                        type: string
+                        description: Last name of the user
+                        default: "Snow"
+                    email:
+                        type: string
+                        description: Email address of the user
+                        default: "jon.snow@gmail.com"
+                    is_admin:
+                        type: bool
+                        description: Define if the user is an admin or not
+                        default: False
+                    id:
+                        type: number
+                        description: id of the user
+                        default: 1
+                    created_at:
+                        type: datetime string
+                        description: date and time the user was created in the database
+                        default: '2016-08-11 20:30:38.959846'
+                    updated_at:
+                        type: datetime string
+                        description: date and time the user was updated in the database
+                        default: '2016-08-11 20:30:38.959846'
+        404:
+            description: User was not found
+        500:
+            description: Request could not be processed
+    """
     try:
         ''' Check if user_id exists '''
         query = User.select().where(User.id == user_id)
@@ -111,7 +240,45 @@ def get_user(user_id):
 @app.route('/users/<user_id>', methods=['PUT'])
 @as_json
 def update_user(user_id):
-    ''' Updates user information '''
+    """
+    Update a user
+    Update a user in the database
+    ---
+    tags:
+        - User
+    parameters:
+        -
+            name: first_name
+            in: form
+            type: string
+            description: First name of the user
+        -
+            name: last_name
+            in: form
+            type: string
+            description: Last name of the user
+        -
+            name: is_admin
+            in: form
+            type: boolean
+            description: Defines if the user is an admin
+        -
+            name: password
+            in: form
+            type: string
+            description: Password for the user
+    responses:
+        200:
+            description: User was updated
+            schema:
+                $ref: '#/definitions/update_booking_put_put_success'
+        400:
+            description: Issue with user update request
+        403:
+            description: Email cannot be changed
+        500:
+            description: The request was not able to be processed
+    """
     data = {}
     for key in request.form.keys():
     	for value in request.form.getlist(key):
@@ -173,7 +340,29 @@ def update_user(user_id):
 @app.route('/users/<user_id>', methods=['DELETE'])
 @as_json
 def delete_user(user_id):
-    ''' Deletes a specific user '''
+    """
+    Delete the given user
+    Deletes the given user in the database.
+    ---
+    tags:
+        - User
+    parameters:
+        -
+            in: path
+            name: user_id
+            type: string
+            required: True
+            description: ID of the user
+    responses:
+        200:
+            description: User deleted successfully
+            schema:
+                $ref: '#/definitions/delete_amenity_delete_delete_200'
+        404:
+            description: User was not found
+        500:
+            description: Request could not be processed
+    """
     try:
         ''' Check if user_id exists '''
         query = User.select().where(User.id == user_id)

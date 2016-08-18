@@ -17,6 +17,38 @@ import json
 @app.route('/users/<user_id>/reviews', methods=['GET'])
 @as_json
 def get_user_reviews(user_id):
+	"""
+	Get all user reviews
+	List all user reviews in the database.
+	---
+	tags:
+	    - Review
+	parameters:
+		-
+			in: path
+			name: user_id
+			type: string
+			required: True
+			description: ID of the user
+	responses:
+	    200:
+	        description: List of all user reviews
+	        schema:
+	            id: UserReviews
+	            required:
+	                - data
+	                - paging
+	            properties:
+	                data:
+	                    type: array
+	                    description: user reviews array
+	                    items:
+	                        $ref: '#/definitions/get_user_review_get_UserReview'
+	                paging:
+	                    description: pagination
+	                    schema:
+	                        $ref: '#/definitions/get_amenities_get_Paging'
+	"""
 	try:
 		''' Test if user_id exists '''
 		query = User.select().where(User.id == user_id)
@@ -40,17 +72,53 @@ def get_user_reviews(user_id):
 @app.route('/users/<user_id>/reviews', methods=['POST'])
 @as_json
 def create_user_reviews(user_id):
+	"""
+	Create a new user review
+	Create a new review for the given user in the database
+	---
+	tags:
+	    - Review
+	parameters:
+	    -
+	        name: user_id
+	        in: path
+	        type: integer
+	        required: True
+	        description: id of the user being reviewed
+	    -
+	        name: user_id
+	        in: form
+	        type: integer
+	        required: True
+	        description: id of the user giving the review
+	    -
+	        name: message
+	        in: form
+	        type: string
+	        required: True
+	        description: the text of the review
+	    -
+	        name: stars
+	        in: form
+	        type: integer
+	        description: number of stars given on the review
+	responses:
+	    201:
+	        description: User review was created
+	        schema:
+	            $ref: '#/definitions/create_amenity_post_post_success'
+	    400:
+	        description: Issue with user review request
+	    404:
+	        description: A user was not found
+	    500:
+	        description: The request was not able to be processed
+	"""
 	data = {}
 	for key in request.form.keys():
 		for value in request.form.getlist(key):
 			data[key] = value
 	try:
-		'''
-		Data should include a user_id value that will be used to associate
-		the review to the from user. The fromuserid is the user defined in
-		in the Review model. The user_id from the route is used to associate
-		the review to the user in the ReviewUser model.
-		'''
 		''' Test for required data '''
 		if not data['user_id']:
 			raise KeyError('user_id')
@@ -113,6 +181,75 @@ def create_user_reviews(user_id):
 @app.route('/users/<user_id>/reviews/<review_id>', methods=['GET'])
 @as_json
 def get_user_review(user_id, review_id):
+	"""
+	Get the given user view
+	Returns the given user review in the database.
+	---
+	tags:
+		- Review
+	parameters:
+		-
+			in: path
+			name: user_id
+			type: string
+			required: True
+			description: ID of the user
+		-
+			in: path
+			name: review_id
+			type: string
+			required: True
+			description: ID of the review
+	responses:
+	    200:
+	        description: User review returned successfully
+	        schema:
+	            id: UserReview
+	            required:
+	                - fromuserid
+	                - message
+	                - touserid
+	                - id
+	                - created_at
+	                - updated_at
+	            properties:
+	                message:
+	                    type: string
+	                    description: message of the review
+	                    default: 'Super awesome!'
+	                stars:
+	                    type: integer
+	                    description: number of stars given on review
+	                    default: 5
+	                fromuserid:
+	                    type: integer
+	                    description: id of the user giving the review
+	                    default: 1
+	                touserid:
+	                    type: integer
+	                    description: id of the user receiving the review
+	                    default: 2
+	                toplaceid:
+	                    type: integer
+	                    description: id of the place receiving the review
+	                    default: None
+	                id:
+	                    type: integer
+	                    description: id of the review
+	                    default: 1
+	                created_at:
+	                    type: datetime string
+	                    description: date and time the review was created in the database
+	                    default: '2016-08-11 20:30:38'
+	                updated_at:
+	                    type: datetime string
+	                    description: date and time the review was updated in the database
+	                    default: '2016-08-11 20:30:38'
+	    404:
+	        description: Review or a user was not found
+	    500:
+	        description: Request could not be processed
+    """
 	try:
 		query = ReviewUser.select().where(ReviewUser.review == review_id, ReviewUser.user == user_id)
 		if not query.exists():
@@ -130,6 +267,35 @@ def get_user_review(user_id, review_id):
 @app.route('/users/<user_id>/reviews/<review_id>', methods=['DELETE'])
 @as_json
 def delete_user_review(user_id, review_id):
+	"""
+    Delete the given user review
+    Deletes the given user review in the database.
+    ---
+    tags:
+        - Review
+    parameters:
+        -
+            in: path
+            name: user_id
+            type: integer
+            required: True
+            description: ID of the user reviewed
+		-
+            in: path
+            name: review_id
+            type: integer
+            required: True
+            description: ID of the review
+    responses:
+        200:
+            description: User review deleted successfully
+            schema:
+                $ref: '#/definitions/delete_amenity_delete_delete_200'
+        404:
+            description: A user was not found
+        500:
+            description: Request could not be processed
+    """
 	try:
 		query = ReviewUser.select().where(ReviewUser.review == review_id, ReviewUser.user == user_id)
 		if not query.exists():
@@ -152,6 +318,38 @@ def delete_user_review(user_id, review_id):
 @app.route('/places/<place_id>/reviews', methods=['GET'])
 @as_json
 def get_place_reviews(place_id):
+	"""
+	Get all place reviews
+	List all place reviews in the database.
+	---
+	tags:
+	    - Review
+	parameters:
+		-
+			in: path
+			name: place_id
+			type: string
+			required: True
+			description: ID of the place
+	responses:
+	    200:
+	        description: List of all place reviews
+	        schema:
+	            id: PlaceReviews
+	            required:
+	                - data
+	                - paging
+	            properties:
+	                data:
+	                    type: array
+	                    description: place reviews array
+	                    items:
+	                        $ref: '#/definitions/get_place_review_get_PlaceReview'
+	                paging:
+	                    description: pagination
+	                    schema:
+	                        $ref: '#/definitions/get_amenities_get_Paging'
+	"""
 	try:
 		''' Test if user_id exists '''
 		query = Place.select().where(Place.id == place_id)
@@ -173,6 +371,48 @@ def get_place_reviews(place_id):
 @app.route('/places/<place_id>/reviews', methods=['POST'])
 @as_json
 def create_place_review(place_id):
+	"""
+	Create a new place review
+	Create a new review for the given place in the database
+	---
+	tags:
+	    - Review
+	parameters:
+	    -
+	        name: place_id
+	        in: path
+	        type: integer
+	        required: True
+	        description: id of the place being reviewed
+	    -
+	        name: user_id
+	        in: form
+	        type: integer
+	        required: True
+	        description: id of the user giving the review
+	    -
+	        name: message
+	        in: form
+	        type: string
+	        required: True
+	        description: the text of the review
+	    -
+	        name: stars
+	        in: form
+	        type: integer
+	        description: number of stars given on the review
+	responses:
+	    201:
+	        description: Place review was created
+	        schema:
+	            $ref: '#/definitions/create_amenity_post_post_success'
+	    400:
+	        description: Issue with place review request
+	    404:
+	        description: Place or user was not found
+	    500:
+	        description: The request was not able to be processed
+	"""
 	data = {}
 	for key in request.form.keys():
 		for value in request.form.getlist(key):
@@ -240,6 +480,75 @@ def create_place_review(place_id):
 @app.route('/places/<place_id>/reviews/<review_id>', methods=['GET'])
 @as_json
 def get_place_review(place_id, review_id):
+	"""
+	Get the given place review
+	Returns the given place review in the database.
+	---
+	tags:
+		- Review
+	parameters:
+		-
+			in: path
+			name: place_id
+			type: string
+			required: True
+			description: ID of the place
+		-
+			in: path
+			name: review_id
+			type: string
+			required: True
+			description: ID of the review
+	responses:
+	    200:
+	        description: Place review returned successfully
+	        schema:
+	            id: PlaceReview
+	            required:
+	                - fromuserid
+	                - message
+	                - toplaceid
+	                - id
+	                - created_at
+	                - updated_at
+	            properties:
+	                message:
+	                    type: string
+	                    description: message of the review
+	                    default: 'Super awesome!'
+	                stars:
+	                    type: integer
+	                    description: number of stars given on review
+	                    default: 5
+	                fromuserid:
+	                    type: integer
+	                    description: id of the user giving the review
+	                    default: 1
+	                touserid:
+	                    type: integer
+	                    description: id of the user receiving the review
+	                    default: None
+	                toplaceid:
+	                    type: integer
+	                    description: id of the place receiving the review
+	                    default: 1
+	                id:
+	                    type: integer
+	                    description: id of the review
+	                    default: 1
+	                created_at:
+	                    type: datetime string
+	                    description: date and time the review was created in the database
+	                    default: '2016-08-11 20:30:38'
+	                updated_at:
+	                    type: datetime string
+	                    description: date and time the review was updated in the database
+	                    default: '2016-08-11 20:30:38'
+	    404:
+	        description: Review, user or place was not found
+	    500:
+	        description: Request could not be processed
+    """
 	try:
 		query = ReviewPlace.select().where(ReviewPlace.review == review_id, ReviewPlace.place == place_id)
 		if not query.exists():
@@ -256,6 +565,35 @@ def get_place_review(place_id, review_id):
 @app.route('/places/<place_id>/reviews/<review_id>', methods=['DELETE'])
 @as_json
 def delete_place_review(place_id, review_id):
+	"""
+    Delete the given place review
+    Deletes the given place review in the database.
+    ---
+    tags:
+        - Review
+    parameters:
+        -
+            in: path
+            name: place_id
+            type: integer
+            required: True
+            description: ID of the place reviewed
+		-
+            in: path
+            name: review_id
+            type: integer
+            required: True
+            description: ID of the review
+    responses:
+        200:
+            description: Place review deleted successfully
+            schema:
+                $ref: '#/definitions/delete_amenity_delete_delete_200'
+        404:
+            description: Place or user was not found
+        500:
+            description: Request could not be processed
+    """
 	try:
 		query = ReviewPlace.select().where(ReviewPlace.review == review_id, ReviewPlace.place == place_id)
 		if not query.exists():
