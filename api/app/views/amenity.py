@@ -134,7 +134,6 @@ def create_amenity():
         res['msg'] = "amenity was created successfully"
         return res, 201
     except KeyError as e:
-        print data
         res = {}
         res['code'] = 40000
         res['msg'] = 'missing parameters'
