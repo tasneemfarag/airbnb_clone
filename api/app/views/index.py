@@ -9,7 +9,31 @@ import re
 @app.route('/', methods=['GET'])
 @as_json
 def index():
-    '''get the current datetime in UTC and the current of the server'''
+    """
+    Root of the AirBnB API
+    This endpoint return API status and server times (local and UTC)
+    ---
+    tags:
+      - Index
+    responses:
+      200:
+        description: Status and server times
+        schema:
+          id: return_index
+          properties:
+            status:
+              type: string
+              description: API Status
+              default: 'OK'
+            time:
+              type: datetime
+              description: server time
+              default: '20/07/2016 15:47:29'
+            utc_time:
+              type: datetime
+              description: server time in UTC
+              default: '20/07/2016 22:47:29'
+    """
     data = {}
     data['status'] = 'OK'
     data['utc_time'] = datetime.utcnow().strftime("%Y/%m/%d %H:%M:%S")

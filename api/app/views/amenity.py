@@ -18,18 +18,98 @@ import json
 @app.route('/amenities', methods=['GET'])
 @as_json
 def get_amenities():
-    ''' Returns all amenities in a list named result '''
+    """
+    Get all amenities
+    List all amenities in the database.
+    ---
+    tags:
+        - Amenity
+    responses:
+        200:
+            description: List of all amenities
+            schema:
+                id: Amenities
+                required:
+                    - data
+                    - paging
+                properties:
+                    data:
+                        type: array
+                        description: amenities array
+                        items:
+                            $ref: '#/definitions/get_amenity_get_Amenity'
+                    paging:
+                        description: pagination
+                        schema:
+                            id: Paging
+                            required:
+                                - next
+                                - prev
+                            properties:
+                                next:
+                                    type: string
+                                    description: next page URL
+                                    default: "/<path>?page=3&number=10"
+                                prev:
+                                    type: string
+                                    description: previous page URL
+                                    default: "/<path>?page=1&number=10"
+    """
     data = Amenity.select()
     return ListStyle.list(data, request), 200
 
 @app.route('/amenities', methods=['POST'])
 @as_json
 def create_amenity():
-    ''' Creates a new amenity '''
+    """
+    Create a new amenity
+    Create a new amenity in the database.
+    ---
+    tags:
+        - Amenity
+    parameters:
+        -
+            name: name
+            in: form
+            type: string
+            required: True
+            description: Name of the amenity
+    responses:
+        201:
+            description: Amenity was created
+            schema:
+                id: post_success
+                required:
+                    - code
+                    - id
+                    - msg
+                properties:
+                    code:
+                        type: integer
+                        description: Response code from the API
+                        default: 201
+                    id:
+                        type: integer
+                        description: ID of the newly created record
+                        default: 1
+                    msg:
+                        type: string
+                        description: Message about record creation
+                        default: "created successfully"
+        400:
+            description: Issue with amenity request
+        409:
+            description: Amenity already exists
+        500:
+            description: The request was not able to be processed
+    """
     data = {}
-    for key in request.form.keys():
-    	for value in request.form.getlist(key):
-    		data[key] = value
+    if request.json:
+        data = request.json
+    else:
+        for key in request.form.keys():
+        	for value in request.form.getlist(key):
+        		data[key] = value
     try:
         ''' Check if name for amenity was given '''
         if not 'name' in data:
@@ -37,12 +117,12 @@ def create_amenity():
 
         ''' Check if name is a string '''
         if not type_test(data['name'], 'string'):
-            raise TypeError("Amenity 'name' must be a string value")
+            raise TypeError("amenity 'name' must be a string value")
 
         ''' Check if amenity already exists '''
         query = Amenity.select().where(Amenity.name == data['name'])
         if query.exists():
-            raise ValueError('Amenity already exists')
+            raise ValueError('amenity already exists')
 
         ''' Create new amenity '''
         new = Amenity.create(
@@ -51,12 +131,12 @@ def create_amenity():
         res = {}
         res['code'] = 201
         res['id'] = new.id
-        res['msg'] = "Amenity was created successfully"
+        res['msg'] = "amenity was created successfully"
         return res, 201
     except KeyError as e:
         res = {}
         res['code'] = 40000
-        res['msg'] = 'Missing parameters'
+        res['msg'] = 'missing parameters'
         return res, 400
     except TypeError as e:
         res = {}
@@ -74,7 +154,51 @@ def create_amenity():
 @app.route('/amenities/<amenity_id>', methods=['GET'])
 @as_json
 def get_amenity(amenity_id):
-    ''' Gets the details of the given amenity '''
+    """
+    Get the given amenity
+    Return the given amenity in the database.
+    ---
+    tags:
+        - Amenity
+    parameters:
+        -
+            in: path
+            name: amenity_id
+            type: string
+            required: True
+            description: ID of the amenity
+    responses:
+        200:
+            description: Amenity returned successfully
+            schema:
+                id: Amenity
+                required:
+                    - name
+                    - id
+                    - created_at
+                    - updated_at
+                properties:
+                    name:
+                        type: string
+                        description: Name of the amenity
+                        default: "Swimming Pool"
+                    id:
+                        type: number
+                        description: id of the amenity
+                        default: 1
+                    created_at:
+                        type: datetime string
+                        description: date and time the amenity was created in the database
+                        default: '2016-08-11 20:30:38'
+                    updated_at:
+                        type: datetime string
+                        description: date and time the amenity was updated in the database
+                        default: '2016-08-11 20:30:38'
+        404:
+            description: Amenity was not found
+        500:
+            description: Request could not be processed
+    """
     try:
         ''' Check if amenity exists '''
         query = Amenity.select().where(Amenity.id == amenity_id)
@@ -92,7 +216,41 @@ def get_amenity(amenity_id):
 @app.route('/amenities/<amenity_id>', methods=['DELETE'])
 @as_json
 def delete_amenity(amenity_id):
-    ''' Deletes the given amenity '''
+    """
+    Delete the given amenity
+    Deletes the given amenity in the database.
+    ---
+    tags:
+        - Amenity
+    parameters:
+        -
+            in: path
+            name: amenity_id
+            type: string
+            required: True
+            description: ID of the amenity
+    responses:
+        200:
+            description: Amenity deleted successfully
+            schema:
+                id: delete_200
+                required:
+                    - code
+                    - msg
+                properties:
+                    code:
+                        type: integer
+                        description: Response code from the API
+                        default: 200
+                    msg:
+                        type: string
+                        description: Message about record deletion
+                        default: "deleted successfully"
+        404:
+            description: Amenity was not found
+        500:
+            description: Request could not be processed
+    """
     try:
         ''' Check if amenity exists '''
         query = Amenity.select().where(Amenity.id == amenity_id)
@@ -114,7 +272,25 @@ def delete_amenity(amenity_id):
 @app.route('/places/<place_id>/amenities', methods=['GET'])
 @as_json
 def get_place_amenities(place_id):
-    ''' Gets all amenities for the given place '''
+    """
+    Get amenities for place
+    Return a list of all amenities for a place
+    ---
+    tags:
+        - Amenity
+    parameters:
+        -
+            in: path
+            name: place_id
+            type: string
+            required: True
+            description: ID of the place
+    responses:
+        200:
+            description: List of all amenities for the place
+            schema:
+                $ref: '#/definitions/get_amenities_get_Amenities'
+    """
     try:
         ''' Check if the place exists '''
         query = Place.select().where(Place.id == place_id)
@@ -132,6 +308,37 @@ def get_place_amenities(place_id):
 @app.route('/places/<place_id>/amenities/<amenity_id>', methods=['POST'])
 @as_json
 def post_place_amenity(place_id, amenity_id):
+    """
+    Create a new amenity for place
+    Create a new amenity in the database for the given place
+    ---
+    tags:
+        - Amenity
+    parameters:
+        -
+            name: place_id
+            in: path
+            type: string
+            required: True
+            description: ID of the given place
+        -
+            name: amenity_id
+            in: path
+            type: string
+            required: True
+            description: ID of the given amenity
+    responses:
+        201:
+            description: Amenity was created
+            schema:
+                $ref: '#/definitions/create_amenity_post_post_success'
+        400:
+            description: Issue with amenity request
+        409:
+            description: Amenity already exists
+        500:
+            description: The request was not able to be processed
+    """
     try:
         ''' Check if place_id is valid '''
         query = Place.select().where(Place.id == place_id)
@@ -171,6 +378,38 @@ def post_place_amenity(place_id, amenity_id):
 @app.route('/places/<place_id>/amenities/<amenity_id>', methods=['DELETE'])
 @as_json
 def delete_place_amenity(place_id, amenity_id):
+    """
+    Delete the given amenity
+    Deletes the given amenity in the database.
+    ---
+    tags:
+        - Amenity
+    parameters:
+        -
+            name: place_id
+            in: path
+            type: string
+            required: True
+            description: ID of the given place
+        -
+            name: amenity_id
+            in: path
+            type: string
+            required: True
+            description: ID of the given amenity
+    responses:
+        200:
+            description: Amenity deleted successfully
+            schema:
+                $ref: '#/definitions/delete_amenity_delete_delete_200'
+                required:
+                    - code
+                    - msg
+        404:
+            description: Amenity was not found
+        500:
+            description: Request could not be processed
+    """
     try:
         ''' Check if place_id is valid '''
         query = Place.select().where(Place.id == place_id)

@@ -13,6 +13,31 @@ import json
 @app.route('/states', methods=['GET'])
 @as_json
 def get_states():
+    """
+    Get all states
+    List all states in the database.
+    ---
+    tags:
+        - State
+    responses:
+        200:
+            description: List of all states
+            schema:
+                id: States
+                required:
+                    - data
+                    - paging
+                properties:
+                    data:
+                        type: array
+                        description: states array
+                        items:
+                            $ref: '#/definitions/get_state_get_State'
+                    paging:
+                        description: pagination
+                        schema:
+                            $ref: '#/definitions/get_amenities_get_Paging'
+    """
     try:
         ''' Returns a list of states in list named result '''
         data = State.select()
@@ -23,7 +48,31 @@ def get_states():
 @app.route('/states', methods=['POST'])
 @as_json
 def create_state():
-    ''' Adds a new state '''
+    """
+    Create a new state
+    Create a new state in the database
+    ---
+    tags:
+        - State
+    parameters:
+        -
+            name: name
+            in: form
+            type: string
+            required: True
+            description: Name of the state
+    responses:
+        201:
+            description: State was created
+            schema:
+                $ref: '#/definitions/create_amenity_post_post_success'
+        400:
+            description: Issue with state request
+        409:
+            description: State already exists
+        500:
+            description: The request was not able to be processed
+    """
     data = {}
     for key in request.form.keys():
     	for value in request.form.getlist(key):
@@ -76,7 +125,51 @@ def create_state():
 @app.route('/states/<state_id>', methods=['GET'])
 @as_json
 def get_state(state_id):
-    ''' Returns a given state '''
+    """
+    Get the given state
+    Returns the given state in the database.
+    ---
+    tags:
+    	- State
+    parameters:
+    	-
+    		in: path
+    		name: state_id
+    		type: integer
+    		required: True
+    		description: ID of the state
+    responses:
+        200:
+            description: State returned successfully
+            schema:
+                id: State
+                required:
+                    - name
+                    - id
+                    - created_at
+                    - updated_at
+                properties:
+                    name:
+                        type: string
+                        description: name of the given state
+                        default: None
+                    id:
+                        type: integer
+                        description: id of the state
+                        default: 1
+                    created_at:
+                        type: datetime string
+                        description: date and time the state was created in the database
+                        default: '2016-08-11 20:30:38'
+                    updated_at:
+                        type: datetime string
+                        description: date and time the state was updated in the database
+                        default: '2016-08-11 20:30:38'
+        404:
+            description: State was not found
+        500:
+            description: Request could not be processed
+    """
     try:
         ''' Check that state_id exists '''
         query = State.select().where(State.id == state_id)
@@ -93,7 +186,29 @@ def get_state(state_id):
 @app.route('/states/<state_id>', methods=['DELETE'])
 @as_json
 def delete_state(state_id):
-    ''' Deletes the given state '''
+    """
+    Delete the given state
+    Deletes the given state in the database.
+    ---
+    tags:
+        - State
+    parameters:
+        -
+            in: path
+            name: state_id
+            type: string
+            required: True
+            description: ID of the state
+    responses:
+        200:
+            description: State deleted successfully
+            schema:
+                $ref: '#/definitions/delete_amenity_delete_delete_200'
+        404:
+            description: State was not found
+        500:
+            description: Request could not be processed
+    """
     try:
         ''' Check that state_id exists '''
         query = State.select().where(State.id == state_id)
